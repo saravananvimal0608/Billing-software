@@ -8,7 +8,7 @@ const AdminDashboard = () => {
     const [toggle, setToggle] = useState(false)
 
     return (
-        <div className='d-flex position-relative'>
+        <div className='d-flex position-relative vh-100 overflow-hidden'>
             <div className={`${toggle ? "mobile-view-active" : 'mobile-view'}`}>
                 <AdminSideBar setToggle={setToggle} />
             </div>
@@ -19,7 +19,7 @@ const AdminDashboard = () => {
                 onClick={() => setToggle(true)}
             />
 
-                {toggle && (
+            {toggle && (
                 <div
                     className="sidebar-overlay"
                     onClick={() => setToggle(false)}
@@ -27,7 +27,7 @@ const AdminDashboard = () => {
             )}
 
 
-            <div className='d-flex flex-grow-1 '>
+            <div className='flex-grow-1 overflow-auto'>
                 <Outlet />
             </div>
 

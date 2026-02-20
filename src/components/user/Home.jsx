@@ -127,7 +127,8 @@ const Home = () => {
                             <div
                                 className="p-3 rounded shadow text-white bg-color-primary"                            >
                                 <h5>{p.productName}</h5>
-                                <p className="mb-1">₹ {p.productPrice}</p>
+                                <p className="mb-1">Original Price : ₹ {p.originalPrice ? p.originalPrice : "----"}</p>
+                                <p className="mb-1">Sale Price : ₹ {p.productPrice}</p>
                                 <small>{p.category?.categoryName}</small>
                             </div>
                         </div>

@@ -80,6 +80,7 @@ const AllProduct = () => {
                         <tr>
                             <th>No</th>
                             <th>Products</th>
+                            <th>Original Price</th>
                             <th>Price</th>
                             <th>Category</th>
                             <th>Action</th>
@@ -97,9 +98,10 @@ const AllProduct = () => {
                             currentProducts.map((item, index) => (
                                 <tr key={item._id}>
                                     <td>{indexOfFirstProduct + index + 1}</td>
-                                    <td>{item.productName}</td>
-                                    <td>{item.productPrice}</td>
-                                    <td>{item.category?.categoryName}</td>
+                                    <td>{item.productName ? item.productName : '----'}</td>
+                                    <td>{item.originalPrice ? item.originalPrice : "----"}</td>
+                                    <td>{item.productPrice ? item.productPrice : "----"}</td>
+                                    <td>{item.category?.categoryName ? item.category?.categoryName : '----'}</td>
                                     <td>
                                         <MdDelete
                                             size={20}

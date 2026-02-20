@@ -8,7 +8,20 @@ const AddCategory = () => {
 
     const baseUrl = import.meta.env.VITE_BASE_URL;
     const [data, setData] = useState({ categoryName: "", })
+    const [error, setError] = useState({})
+
     const navigate = useNavigate()
+
+    const handleError = () => {
+        const errorMessages = {}
+
+        if (!data.categoryName.trim()) {
+            errorMessages.categoryName = "Category name is required";
+        }
+        setError(errorMessages)
+
+        return Object.keys(errorMessages).length === 0
+    }
 
 
     const handleChange = (e) => {
@@ -16,6 +29,10 @@ const AddCategory = () => {
     }
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        if (!handleError()) {
+            return
+        }
         try {
             const token = localStorage.getItem("token");
             await axios.post(
@@ -49,16 +66,17 @@ const AddCategory = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Category Name</label>
+                        <label className={` ${error.categoryName ? "border-danger" : ''}`}>Category Name</label>
                         <input
                             type="text"
-                            className="form-input"
+                            className={`form-input ${error.categoryName ? "border-danger" : ''}`}
                             name="categoryName"
                             value={data.categoryName}
                             onChange={handleChange}
                             placeholder="Enter category name"
                             required
                         />
+                        {error.categoryName && <p className="text-danger mt-2">{error.categoryName}</p>}
                     </div>
 
                     <button
