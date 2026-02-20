@@ -44,8 +44,8 @@ const AddUser = () => {
             return
         }
         try {
-            await axios.post(`${baseUrl}api/users/create`, data)
-            toast.success("Register Successfully")
+            const res = await axios.post(`${baseUrl}api/users/create`, data)
+            toast.success(res.data.message);
             setData({ name: "", password: '' })
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {

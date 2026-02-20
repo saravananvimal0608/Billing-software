@@ -33,7 +33,9 @@ const App = () => {
             <Route index element={<Dashboard />} />
             <Route path='adduser' element={<AddUser />} />
             <Route path='addcategory' element={<AddCategory />} />
+            <Route path='editcategory/:id' element={<AddCategory />} />
             <Route path='addproduct' element={<AddProduct />} />
+             <Route path='editproduct/:id' element={<AddProduct />} />
             <Route path='allcategories' element={<AllCategories />} />
             <Route path='allproducts' element={<AllProduct />} />
             <Route path='allusers' element={<AllUser />} />

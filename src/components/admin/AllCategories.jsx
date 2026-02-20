@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from "react-icons/md";
 import Popup from '../Popup';
+import { Link } from 'react-router-dom';
 
 const AllCategories = () => {
 
@@ -34,12 +35,12 @@ const AllCategories = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${baseUrl}api/category/${deleteId}`, {
+            const res = await axios.delete(`${baseUrl}api/category/${deleteId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             })
-            toast.success("Category Deleted Successfully")
+            toast.success(res.data.message);
             handleFetchCategories()
             setTogglePopup(false)
         } catch (error) {
@@ -104,10 +105,12 @@ const AllCategories = () => {
                                             className="me-3 action-icon"
                                             onClick={() => handlePopup(cat)}
                                         />
-                                        <MdEdit
-                                            size={20}
-                                            className="action-icon"
-                                        />
+                                        <Link to={`/admin/editcategory/${cat._id}`} className='text-black'>
+                                            <MdEdit
+                                                size={20}
+                                                className="action-icon"
+                                            />
+                                        </Link>
                                     </td>
                                 </tr>
                             ))

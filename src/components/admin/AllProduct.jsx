@@ -3,6 +3,7 @@ import Popup from '../Popup'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from 'react-icons/md'
+import { Link } from 'react-router-dom'
 
 const AllProduct = () => {
     const [togglePopup, setTogglePopup] = useState(false)
@@ -32,12 +33,12 @@ const AllProduct = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${baseUrl}api/product/${deleteId}`, {
+            const res = await axios.delete(`${baseUrl}api/product/${deleteId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             })
-            toast.success("Product deleted successfully")
+            toast.success(res.data.message);
             setTogglePopup(false)
             handleFetch()
         } catch (error) {
@@ -108,10 +109,12 @@ const AllProduct = () => {
                                             className="me-md-3 action-icon"
                                             onClick={() => handlePopup(item)}
                                         />
+                                        <Link to={`/admin/editproduct/${item._id}`} className='text-black'>
                                         <MdEdit
                                             size={20}
                                             className="action-icon"
                                         />
+                                        </Link>
                                     </td>
                                 </tr>
                             ))

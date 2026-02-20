@@ -32,10 +32,10 @@ const AllUser = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${baseUrl}api/users/delete/${deleteId}`)
+            const res = await axios.delete(`${baseUrl}api/users/delete/${deleteId}`)
             setTogglePopup(false)
             handleFetch()
-            toast.success("User deleted successfully");
+            toast.success(res.data.message);
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
                 toast.error(error.response.data.message);

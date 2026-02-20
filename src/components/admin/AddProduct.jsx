@@ -2,7 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { toast } from 'react-toastify';
 import '../../css/Login.css';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const AddProduct = () => {
 
@@ -12,21 +12,45 @@ const AddProduct = () => {
     const [categories, setCategories] = useState([])
     const [error, setError] = useState({})
     const navigate = useNavigate()
+    const id = useParams().id
+
+
+    const handleEditFetch = async () => {
+        try {
+            const res = await axios.get(`${baseUrl}api/product/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+            )
+            console.log(res);
+
+            setData({
+                productName: res.data.productName || "",
+                originalPrice: res.data.originalPrice || "",
+                productPrice: res.data.productPrice || "",
+                category: res.data.category?._id || ""
+            })
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Something went wrong")
+        }
+
+    }
 
     const handleError = () => {
         const errorMessages = {}
 
-        if (!data.productName.trim()) {
+        if (!data.productName) {
             errorMessages.productName = "Product name is required";
         }
 
-        if (!data.originalPrice.trim()) {
+        if (!data.originalPrice) {
             errorMessages.originalPrice = "Original price is required";
         } else if (isNaN(data.originalPrice) || Number(data.originalPrice) <= 0) {
             errorMessages.originalPrice = "Original price must be a positive number";
         }
 
-        if (!data.productPrice.trim()) {
+        if (!data.productPrice) {
             errorMessages.productPrice = "Product price is required";
         } else if (isNaN(data.productPrice) || Number(data.productPrice) <= 0) {
             errorMessages.productPrice = "Product price must be a positive number";
@@ -52,7 +76,15 @@ const AddProduct = () => {
         }
 
         try {
-            await axios.post(
+            const res = id ? await axios.put(
+                `${baseUrl}api/product/${id}`,
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            ) : await axios.post(
                 `${baseUrl}api/product/add`,
                 data,
                 {
@@ -61,9 +93,11 @@ const AddProduct = () => {
                     }
                 }
             );
-            toast.success("Product Added Successfully");
-            setData({ productName: "", productPrice: "", category: "" });
-            navigate("/admin/allproducts");
+            toast.success(res.data.message);
+            if (!id) {
+                setData({ productName: "", productPrice: "", category: "" });
+                navigate("/admin/allproducts");
+            }
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
                 toast.error(error.response.data.message);
@@ -73,31 +107,39 @@ const AddProduct = () => {
         }
     }
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get(`${baseUrl}api/category/`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setCategories(response.data);
-            } catch (error) {
-                if (error.response && error.response.data && error.response.data.message) {
-                    toast.error(error.response.data.message);
-                } else {
-                    toast.error("Something went wrong");
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}api/category/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
+            });
+            setCategories(response.data);
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong");
             }
-        };
+        }
+    };
+
+    useEffect(() => {
         fetchCategories();
-    }, [baseUrl, token]);
+    }, []);
+
+    useEffect(() => {
+        if (id) {
+            handleEditFetch();
+        }
+    }, [id]);
+
 
     return (
         <div className="common-box mt-5">
             <div className="login-card">
-                <h2 className="login-title">Add Product</h2>
-                <p className="login-subtitle">Create a new product</p>
+                <h2 className="login-title">{id ? "Edit" : "Add"} Product</h2>
+                <p className={`login-subtitle ${id ? "d-none" : "d-block"}`} >Create a new product</p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -174,10 +216,10 @@ const AddProduct = () => {
 
                     <button
                         type="submit"
-                        disabled={!data.productName.trim() || !data.productPrice.trim() || !data.category}
-                        className={data.productName.trim() && data.productPrice.trim() && data.category ? "login-btn" : "disable-btn"}
+                        disabled={!data.productName || !data.productPrice || !data.category}
+                        className={data.productName && data.productPrice && data.category ? "login-btn" : "disable-btn"}
                     >
-                        Add Product
+                        {id ? " Edit Product" : " Add Product"}
                     </button>
                 </form>
             </div>
