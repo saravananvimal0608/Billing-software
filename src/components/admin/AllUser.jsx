@@ -1,8 +1,10 @@
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { MdDelete } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import Popup from '../Popup'
+import { commonApi } from '../../common/common.js'
+import Spinner from '../Spinner.jsx'
+import { Link } from 'react-router-dom'
 
 const AllUser = () => {
 
@@ -10,16 +12,16 @@ const AllUser = () => {
     const [togglePopup, setTogglePopup] = useState(false)
     const [popupData, setPopupData] = useState(null)
     const [deleteId, setDeleteId] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
 
-    // ✅ Pagination States
     const [currentPage, setCurrentPage] = useState(1)
     const usersPerPage = 5
 
-    const baseUrl = import.meta.env.VITE_BASE_URL
-
     const handleFetch = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/users/allUser`)
+            setLoading(true)
+            const res = await commonApi({ method: "GET", endpoint: "api/users/allUser" })
             setUsers(res.data.data)
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
@@ -27,14 +29,18 @@ const AllUser = () => {
             } else {
                 toast.error("Something went wrong");
             }
+        } finally {
+            setLoading(false)
         }
     }
 
     const handleDelete = async () => {
         try {
-            const res = await axios.delete(`${baseUrl}api/users/delete/${deleteId}`)
+            setLoading(true)
+            const res = await commonApi({ method: "DELETE", endpoint: `api/users/delete/${deleteId}` })
             setTogglePopup(false)
-            handleFetch()
+            await handleFetch()
+            setCurrentPage(1)
             toast.success(res.data.message);
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
@@ -42,6 +48,8 @@ const AllUser = () => {
             } else {
                 toast.error("Something went wrong");
             }
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -51,23 +59,30 @@ const AllUser = () => {
         setTogglePopup(true)
     }
 
-    // ✅ Filter only normal users
-    const filteredUsers = users.filter(user => user.role === false)
+    const filteredUsers = users.filter(user => user.role === false && 
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  
+    
 
-    // ✅ Pagination Logic
-    const indexOfLastUser = currentPage * usersPerPage
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage)
+    const safeCurrentPage = currentPage > totalPages ? 1 : currentPage
+
+    const indexOfLastUser = safeCurrentPage * usersPerPage
     const indexOfFirstUser = indexOfLastUser - usersPerPage
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser)
 
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage)
+    console.log(currentUsers);
+    
 
     useEffect(() => {
         handleFetch()
     }, [])
 
     return (
-
-        <div className='w-100 '>
+        <>
+            {loading && <Spinner fullScreen={true} />}
+            <div className='w-100 '>
 
             {togglePopup && (
                 <Popup
@@ -78,7 +93,22 @@ const AllUser = () => {
             )}
 
             <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
-                <h1 className='my-5 login-title '>All Users</h1>
+                <h1 className='mt-5 login-title'>All Users</h1>
+
+                <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
+                    <input
+                        className='w-50 input-search-box'
+                        type='text'
+                        placeholder='Search users...'
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value)
+                            setCurrentPage(1)
+                        }}
+                    />
+                    <Link to="/admin/adduser" className='btn add-btn'>
+                        Add User
+                    </Link>
+                </div>
 
                 <table className="premium-table w-100">
                     <thead>
@@ -102,7 +132,7 @@ const AllUser = () => {
                                     <th scope="row">
                                         {indexOfFirstUser + index + 1}
                                     </th>
-                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
                                     <td>
                                         <MdDelete
                                             size={20}
@@ -117,25 +147,24 @@ const AllUser = () => {
                     </tbody>
                 </table>
 
-                {/* ✅ Pagination Buttons */}
                 {totalPages > 1 && (
-                    <div className="d-flex justify-content-center mt-4">
+                    <div className="d-flex justify-content-center align-items-center mt-4">
 
                         <button
-                            className="btn btn-secondary me-2"
-                            disabled={currentPage === 1}
+                            className="pagination-btn me-3"
+                            disabled={safeCurrentPage === 1}
                             onClick={() => setCurrentPage(prev => prev - 1)}
                         >
                             Prev
                         </button>
 
-                        <span className="align-self-center">
-                            Page {currentPage} of {totalPages}
+                        <span className="color-primary fw-bold">
+                            Page {safeCurrentPage} of {totalPages}
                         </span>
 
                         <button
-                            className="btn btn-secondary ms-2"
-                            disabled={currentPage === totalPages}
+                            className="pagination-btn ms-3"
+                            disabled={safeCurrentPage === totalPages}
                             onClick={() => setCurrentPage(prev => prev + 1)}
                         >
                             Next
@@ -147,6 +176,7 @@ const AllUser = () => {
 
             </div>
         </div>
+        </>
     )
 }
 

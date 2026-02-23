@@ -1,48 +1,46 @@
 import React, { useEffect, useState } from 'react'
 import Popup from '../Popup'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from 'react-icons/md'
 import { Link } from 'react-router-dom'
+import { commonApi } from '../../common/common.js'
+import Spinner from '../Spinner.jsx'
 
 const AllProduct = () => {
     const [togglePopup, setTogglePopup] = useState(false)
     const [popupData, setPopupData] = useState(null)
     const [deleteId, setDeleteId] = useState(null)
     const [products, setProducts] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
 
-    // ✅ Pagination State
     const [currentPage, setCurrentPage] = useState(1)
     const productsPerPage = 5
 
-    const token = localStorage.getItem("token")
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-
     const handleFetch = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/product/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            setLoading(true)
+            const res = await commonApi({ method: "GET", endpoint: "api/product/" })
             setProducts(res.data)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
     }
 
     const handleDelete = async () => {
         try {
-            const res = await axios.delete(`${baseUrl}api/product/${deleteId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            setLoading(true)
+            const res = await commonApi({ method: "DELETE", endpoint: `api/product/${deleteId}` })
             toast.success(res.data.message);
             setTogglePopup(false)
-            handleFetch()
+            await handleFetch()
+            setCurrentPage(1)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -56,14 +54,21 @@ const AllProduct = () => {
         handleFetch()
     }, [])
 
-    // ✅ Pagination Logic
-    const indexOfLastProduct = currentPage * productsPerPage
+    const filteredProducts = products.filter((item) =>
+        item.productName.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
+    const safeCurrentPage = currentPage > totalPages ? 1 : currentPage
+
+    const indexOfLastProduct = safeCurrentPage * productsPerPage
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-    const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct)
-    const totalPages = Math.ceil(products.length / productsPerPage)
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
     return (
-        <div className='w-100'>
+        <>
+            {loading && <Spinner fullScreen={true} />}
+            <div className='w-100'>
 
             {togglePopup &&
                 <Popup
@@ -74,7 +79,22 @@ const AllProduct = () => {
             }
 
             <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
-                <h1 className='my-5 login-title'>All Products</h1>
+                <h1 className='mt-5 login-title'>All Products</h1>
+
+                <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
+                    <input
+                        className='w-50 input-search-box'
+                        type='text'
+                        placeholder='Search products...'
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value)
+                            setCurrentPage(1)
+                        }}
+                    />
+                    <Link to="/admin/addproduct" className='btn add-btn'>
+                        Add Product
+                    </Link>
+                </div>
 
                 <table className="premium-table w-100 all-product-table">
                     <thead>
@@ -122,49 +142,35 @@ const AllProduct = () => {
                     </tbody>
                 </table>
 
-                {/* ✅ Bootstrap Pagination Only */}
                 {totalPages > 1 && (
-                    <nav className="mt-4">
-                        <ul className="pagination justify-content-center">
+                  <div className="d-flex justify-content-center align-items-center mt-4">
 
-                            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => setCurrentPage(currentPage - 1)}
-                                >
-                                    Previous
-                                </button>
-                            </li>
+                    <button
+                        className="pagination-btn me-3"
+                        disabled={safeCurrentPage === 1}
+                        onClick={() => setCurrentPage(prev => prev - 1)}
+                    >
+                        Prev
+                    </button>
 
-                            {[...Array(totalPages)].map((_, index) => (
-                                <li
-                                    key={index}
-                                    className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
-                                >
-                                    <button
-                                        className="page-link"
-                                        onClick={() => setCurrentPage(index + 1)}
-                                    >
-                                        {index + 1}
-                                    </button>
-                                </li>
-                            ))}
+                    <span className="color-primary fw-bold">
+                        Page {safeCurrentPage} of {totalPages}
+                    </span>
 
-                            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                >
-                                    Next
-                                </button>
-                            </li>
+                    <button
+                        className="pagination-btn ms-3"
+                        disabled={safeCurrentPage === totalPages}
+                        onClick={() => setCurrentPage(prev => prev + 1)}
+                    >
+                        Next
+                    </button>
 
-                        </ul>
-                    </nav>
+                </div>
                 )}
 
             </div>
         </div>
+        </>
     )
 }
 

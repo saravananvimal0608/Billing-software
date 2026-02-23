@@ -1,29 +1,28 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { toast } from 'react-toastify';
 import '../../css/Login.css';
 import { useNavigate, useParams } from "react-router-dom";
+import { commonApi } from "../../common/common.js";
+import Spinner from "../Spinner.jsx";
 
 const AddCategory = () => {
 
-    const baseUrl = import.meta.env.VITE_BASE_URL;
     const [data, setData] = useState({ categoryName: "", })
     const [error, setError] = useState({})
-    const token = localStorage.getItem("token");
+    const [loading, setLoading] = useState(false)
     const id = useParams().id
     const navigate = useNavigate()
 
 
     const handleFetchCategoryById = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/category/single/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            setLoading(true)
+            const res = await commonApi({ method: "GET", endpoint: `api/category/single/${id}` })
              setData({ categoryName: res.data.category.categoryName })
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
 
        
@@ -51,12 +50,8 @@ const AddCategory = () => {
             return
         }
         try {
-            const res = id ? await axios.put(`${baseUrl}api/category/${id}`, data, { headers: { Authorization: `Bearer ${token}` } }) : await axios.post(`${baseUrl}api/category/add`, data, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            );
+            setLoading(true)
+            const res = id ? await commonApi({ method: "PUT", endpoint: `api/category/${id}`, data }) : await commonApi({ method: "POST", endpoint: "api/category/add", data });
             toast.success(res.data.message);
 
             if (!id) {
@@ -71,6 +66,8 @@ const AddCategory = () => {
                 toast.error("Something went wrong");
             }
 
+        } finally {
+            setLoading(false)
         }
 
     }
@@ -83,7 +80,9 @@ const AddCategory = () => {
     }, [id])
 
     return (
-        <div className="common-box mt-5">
+        <>
+            {loading && <Spinner fullScreen={true} />}
+            <div className="common-box">
             <div className="login-card">
                 <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
                 <p className="login-subtitle">{id ? "Edit" : "Create a new"} product category</p>
@@ -113,6 +112,7 @@ const AddCategory = () => {
                 </form>
             </div>
         </div>
+        </>
     );
 }
 

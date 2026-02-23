@@ -1,32 +1,32 @@
-import axios from "axios"
 import { useState } from "react"
 import { toast } from 'react-toastify';
 import '../../css/Login.css';
+import { commonApi } from "../../common/common.js";
+import Spinner from "../Spinner.jsx";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const AddUser = () => {
 
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-    const [data, setData] = useState({ name: "", password: '' })
-
+    const [data, setData] = useState({ email: "", password: '' })
     const [error, setError] = useState({})
-
-
+    const [loading, setLoading] = useState(false)
+    const [toggle, setToggle] = useState(false)
 
     const handleError = () => {
         const errorMessages = {}
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!data.name.trim()) {
-            errorMessages.name = "Name is required";
+        if (!data.email.trim()) {
+            errorMessages.email = "Email is required";
+        } else if (!emailRegex.test(data.email)) {
+            errorMessages.email = "Please enter a valid email address";
         }
 
         if (!data.password.trim()) {
             errorMessages.password = "Password is required";
+        } else if (data.password.length < 8) {
+            errorMessages.password = "Password must be at least 8 characters long";
         }
-
-        else
-            if (data.password.length < 8) {
-                errorMessages.password = "Password must be at least 8 characters long";
-            }
 
         setError(errorMessages)
 
@@ -44,49 +44,55 @@ const AddUser = () => {
             return
         }
         try {
-            const res = await axios.post(`${baseUrl}api/users/create`, data)
+            setLoading(true)
+            const res = await commonApi({ method: "POST", endpoint: "api/users/create", data })
+            setLoading(false)
             toast.success(res.data.message);
-            setData({ name: "", password: '' })
+            setData({ email: "", password: '' })
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.message);
+        }
+        finally {
+            setLoading(false)
         }
 
     }
 
 
 
-
     return (
-        <div className="common-box mt-5">
-            <div className="login-card">
-                <h2 className="login-title">Create Account</h2>
-                <p className="login-subtitle">Please fill the details to register</p>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className={` ${error.name ? "border-danger" : ''}`}>Enter Name</label>
-                        <input type="text" className={`form-input ${error.name ? "border-danger" : ''}`} name="name" value={data.name} onChange={handleChange} placeholder="Your name" required />
-                        {error.name && <p className="text-danger mt-2">{error.name}</p>}
-                    </div>
-                    <div className="form-group">
-                        <label className={` ${error.password ? "border-danger" : ''}`}>Enter Password</label>
-                        <input type="password" className={`form-input ${error.password ? "border-danger" : ''}`} name="password" value={data.password} onChange={handleChange} placeholder="Your password" required />
-                        {error.password && <p className="text-danger mt-2">{error.password}</p>}
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={!data.name.trim() || !data.password.trim()}
-                        className={data.name && data.password ? "login-btn" : "disable-btn"}
-                    >
-                        Register
-                    </button>
+        <> {loading && <Spinner fullScreen={true} />}
+            <div className="common-box ">
+                <div className="login-card">
+                    <h2 className="login-title">Create Account</h2>
+                    <p className="login-subtitle">Please fill the details to register</p>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className={` ${error.email ? "border-danger" : ''}`}>Enter Email</label>
+                            <input type="email" className={`form-input ${error.email ? "border-danger" : ''}`} name="email" value={data.email} onChange={handleChange} placeholder="Your email" required />
+                            {error.email && <p className="text-danger mt-2">{error.email}</p>}
+                        </div>
+                        <div className="form-group position-relative">
+                            <label className={` ${error.password ? "border-danger" : ''}`}>Enter Password</label>
+                            <input type={toggle ? "text" : "password"} className={`form-input ${error.password ? "border-danger" : ''}`} name="password" value={data.password} onChange={handleChange} placeholder="Your password" required />
+                            <span className="position-absolute" style={{ right: "20px", top: "42px", }} onClick={() => setToggle(!toggle)} >
+                                {toggle ? <FaEye /> : <FaEyeSlash />}
+                            </span>
+                            {error.password && <p className="text-danger mt-2">{error.password}</p>}
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={!data.email.trim() || !data.password.trim()}
+                            className={data.email && data.password ? "login-btn" : "disable-btn"}
+                        >
+                            Register
+                        </button>
 
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+        </>
+
     )
 }
 

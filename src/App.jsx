@@ -18,6 +18,7 @@ import ForgetPassword from './components/ForgetPassword';
 import { ProtectedRoute } from './utils/ProtectedRoute';
 import Main from './components/user/Main';
 import Home from './components/user/Home';
+import ResetPassword from './components/ResetPassword';
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
 
           <Route path='/' element={<Login />} />
           <Route path='/forgotPassword' element={<ForgetPassword />} />
+           <Route path='/resetpassword' element={<ResetPassword />} />
 
           <Route path="/admin" element={<AdminProtectedRoute> <AdminDashboard /> </AdminProtectedRoute>}>
             <Route index element={<Dashboard />} />

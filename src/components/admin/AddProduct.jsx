@@ -1,28 +1,24 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { toast } from 'react-toastify';
 import '../../css/Login.css';
 import { useNavigate, useParams } from "react-router-dom";
+import { commonApi } from "../../common/common.js";
+import Spinner from "../Spinner.jsx";
 
 const AddProduct = () => {
 
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-    const token = localStorage.getItem("token");
     const [data, setData] = useState({ productName: "", originalPrice: "", productPrice: "", category: "" })
     const [categories, setCategories] = useState([])
     const [error, setError] = useState({})
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const id = useParams().id
 
 
     const handleEditFetch = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/product/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            )
+            setLoading(true)
+            const res = await commonApi({ method: "GET", endpoint: `api/product/${id}` })
             console.log(res);
 
             setData({
@@ -33,6 +29,8 @@ const AddProduct = () => {
             })
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
 
     }
@@ -76,23 +74,8 @@ const AddProduct = () => {
         }
 
         try {
-            const res = id ? await axios.put(
-                `${baseUrl}api/product/${id}`,
-                data,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            ) : await axios.post(
-                `${baseUrl}api/product/add`,
-                data,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            setLoading(true)
+            const res = id ? await commonApi({ method: "PUT", endpoint: `api/product/${id}`, data }) : await commonApi({ method: "POST", endpoint: "api/product/add", data });
             toast.success(res.data.message);
             if (!id) {
                 setData({ productName: "", productPrice: "", category: "" });
@@ -104,16 +87,15 @@ const AddProduct = () => {
             } else {
                 toast.error("Something went wrong");
             }
+        } finally {
+            setLoading(false)
         }
     }
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${baseUrl}api/category/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            setLoading(true)
+            const response = await commonApi({ method: "GET", endpoint: "api/category/" });
             setCategories(response.data);
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
@@ -121,6 +103,8 @@ const AddProduct = () => {
             } else {
                 toast.error("Something went wrong");
             }
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -136,94 +120,97 @@ const AddProduct = () => {
 
 
     return (
-        <div className="common-box mt-5">
-            <div className="login-card">
-                <h2 className="login-title">{id ? "Edit" : "Add"} Product</h2>
-                <p className={`login-subtitle ${id ? "d-none" : "d-block"}`} >Create a new product</p>
+        <>
+            {loading && <Spinner fullScreen={true} />}
+            <div className="common-box my-5">
+                <div className="login-card">
+                    <h2 className="login-title">{id ? "Edit" : "Add"} Product</h2>
+                    <p className={`login-subtitle ${id ? "d-none" : "d-block"}`} >Create a new product</p>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className={` ${error.productName ? "border-danger" : ''}`}>Product Name</label>
-                        <input
-                            type="text"
-                            className={`form-input ${error.productName ? "border-danger" : ''}`}
-                            name="productName"
-                            value={data.productName}
-                            onChange={handleChange}
-                            placeholder="Enter Product Name"
-                            required
-                        />
-                        {error.productName && <p className="text-danger mt-2">{error.productName}</p>}
-                    </div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className={` ${error.productName ? "border-danger" : ''}`}>Product Name</label>
+                            <input
+                                type="text"
+                                className={`form-input ${error.productName ? "border-danger" : ''}`}
+                                name="productName"
+                                value={data.productName}
+                                onChange={handleChange}
+                                placeholder="Enter Product Name"
+                                required
+                            />
+                            {error.productName && <p className="text-danger mt-2">{error.productName}</p>}
+                        </div>
 
-                    <div className="form-group">
-                        <label className={` ${error.originalPrice ? "border-danger" : ''}`}>Original Price</label>
-                        <input
-                            type="number"
-                            className={`form-input ${error.originalPrice ? "border-danger" : ''}`}
-                            name="originalPrice"
-                            value={data.originalPrice}
-                            onChange={handleChange}
-                            onKeyDown={(e) => {
-                                if (["e", "E", "+", "-"].includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            placeholder="Enter Product Name"
-                            required
-                        />
-                        {error.originalPrice && <p className="text-danger mt-2">{error.originalPrice}</p>}
-                    </div>
+                        <div className="form-group">
+                            <label className={` ${error.originalPrice ? "border-danger" : ''}`}>Original Price</label>
+                            <input
+                                type="number"
+                                className={`form-input ${error.originalPrice ? "border-danger" : ''}`}
+                                name="originalPrice"
+                                value={data.originalPrice}
+                                onChange={handleChange}
+                                onKeyDown={(e) => {
+                                    if (["e", "E", "+", "-"].includes(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                placeholder="Enter Product Name"
+                                required
+                            />
+                            {error.originalPrice && <p className="text-danger mt-2">{error.originalPrice}</p>}
+                        </div>
 
 
-                    <div className="form-group">
-                        <label className={` ${error.productPrice ? "border-danger" : ''}`}>Product Price</label>
-                        <input
-                            type="number"
-                            className={`form-input ${error.productPrice ? "border-danger" : ''}`}
-                            name="productPrice"
-                            value={data.productPrice}
-                            onChange={handleChange}
-                            onKeyDown={(e) => {
-                                if (["e", "E", "+", "-"].includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            placeholder="Enter Product Price"
-                            required
-                        />
-                        {error.productPrice && <p className="text-danger mt-2">{error.productPrice}</p>}
-                    </div>
+                        <div className="form-group">
+                            <label className={` ${error.productPrice ? "border-danger" : ''}`}>Product Price</label>
+                            <input
+                                type="number"
+                                className={`form-input ${error.productPrice ? "border-danger" : ''}`}
+                                name="productPrice"
+                                value={data.productPrice}
+                                onChange={handleChange}
+                                onKeyDown={(e) => {
+                                    if (["e", "E", "+", "-"].includes(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                placeholder="Enter Product Price"
+                                required
+                            />
+                            {error.productPrice && <p className="text-danger mt-2">{error.productPrice}</p>}
+                        </div>
 
-                    <div className="form-group">
-                        <label className={` ${error.category ? "border-danger" : ''}`}>Product Category</label>
-                        <select
-                            className={`form-input ${error.category ? "border-danger" : ''}`}
-                            name="category"
-                            value={data.category}
-                            onChange={handleChange}
-                            required
+                        <div className="form-group">
+                            <label className={` ${error.category ? "border-danger" : ''}`}>Product Category</label>
+                            <select
+                                className={`form-input ${error.category ? "border-danger" : ''}`}
+                                name="category"
+                                value={data.category}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map((cat) => (
+                                    <option key={cat._id} value={cat._id}>
+                                        {cat.categoryName}
+                                    </option>
+                                ))}
+                            </select>
+                            {error.category && <p className="text-danger mt-2">{error.category}</p>}
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={!data.productName || !data.productPrice || !data.category}
+                            className={data.productName && data.productPrice && data.category ? "login-btn" : "disable-btn"}
                         >
-                            <option value="">Select Category</option>
-                            {categories.map((cat) => (
-                                <option key={cat._id} value={cat._id}>
-                                    {cat.categoryName}
-                                </option>
-                            ))}
-                        </select>
-                        {error.category && <p className="text-danger mt-2">{error.category}</p>}
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={!data.productName || !data.productPrice || !data.category}
-                        className={data.productName && data.productPrice && data.category ? "login-btn" : "disable-btn"}
-                    >
-                        {id ? " Edit Product" : " Add Product"}
-                    </button>
-                </form>
+                            {id ? " Edit Product" : " Add Product"}
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

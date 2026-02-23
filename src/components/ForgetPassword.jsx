@@ -1,17 +1,82 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import '../css/ForgetPassword.css'
+import { useState } from "react"
+import { toast } from 'react-toastify';
+import '../css/Login.css';
+import { useNavigate } from "react-router-dom";
+import { commonApi } from "../common/common.js";
+import Spinner from "./Spinner.jsx";
 
 const ForgetPassword = () => {
+
+    const [data, setData] = useState({ email: "", })
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState({})
+    const navigate = useNavigate()
+
+
+    const handleError = () => {
+        const errorMessage = {}
+
+        if (!data.email) {
+            errorMessage.email = 'email is required'
+        }
+        setError(errorMessage)
+
+        return Object.keys(errorMessage).length === 0
+
+    }
+    const handleChange = (e) => {
+        setData({ ...data, [e.target.name]: e.target.value })
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        if (!handleError()) {
+            return
+        }
+        try {
+            setLoading(true)
+            const res = await commonApi({ method: "POST", endpoint: "api/users/forgotmail", data })
+
+
+            navigate('/resetpassword')
+
+            toast.success(res.data.message)
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong");
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
     return (
-        <div className='forget-password-container'>
-            <div className='forget-password-card'>
-                <div className='coming-soon-icon'>🔒</div>
-                <h1 className='coming-soon-title'>Coming Soon</h1>
-                <p className='coming-soon-text'>Password recovery feature will be available soon</p>
-                <Link to={'/'} className='back-login-btn'>Back to Login</Link>
+        <>
+            {loading && <Spinner fullScreen={true} />}
+            <div className="login-container">
+                <div className="login-card">
+                    <h2 className="login-title">Forgot Password</h2>
+                    <p className="login-subtitle">Please Enter your Email Id</p>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className={` ${error.email ? "border-danger" : ''}`}>Enter Email</label>
+                            <input type="email" className={`form-input ${error.email ? "border-danger" : ''}`}  name="email" value={data.email} onChange={handleChange} placeholder="Your email" required />
+                            {error.email ? <p className="text-danger mt-2">{error.email}</p> : ""}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className={data.email ? "login-btn" : "disable-btn"}
+                            disabled={!data.email}
+                        >
+                            Send Otp
+                        </button>
+
+                    </form>
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 

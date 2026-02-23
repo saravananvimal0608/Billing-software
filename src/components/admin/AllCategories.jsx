@@ -1,50 +1,49 @@
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from "react-icons/md";
 import Popup from '../Popup';
 import { Link } from 'react-router-dom';
+import { commonApi } from '../../common/common.js';
+import Spinner from '../Spinner.jsx';
 
 const AllCategories = () => {
 
-    const [Categories, setCategories] = useState([])
+    const [categories, setCategories] = useState([])
     const [togglePopup, setTogglePopup] = useState(false)
     const [popupData, setPopupData] = useState(null)
     const [deleteId, setDeleteId] = useState("")
-
-    // ✅ Pagination State
+    const [loading, setLoading] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
+
     const categoriesPerPage = 5
 
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-    const token = localStorage.getItem("token")
-
+    // ✅ Fetch Categories
     const handleFetchCategories = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/category/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-
+            setLoading(true)
+            const res = await commonApi({ method: "GET", endpoint: "api/category/" })
             setCategories(res.data)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
     }
 
+    // ✅ Delete Category
     const handleDelete = async () => {
         try {
-            const res = await axios.delete(`${baseUrl}api/category/${deleteId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            toast.success(res.data.message);
-            handleFetchCategories()
+            setLoading(true)
+            const res = await commonApi({ method: "DELETE", endpoint: `api/category/${deleteId}` })
+            toast.success(res.data.message)
+            await handleFetchCategories()
+            setCurrentPage(1) // safe reset
             setTogglePopup(false)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -54,113 +53,119 @@ const AllCategories = () => {
         setTogglePopup(true)
     }
 
+    // Filter First
+    const filteredCategories = categories.filter((cat) =>
+        cat.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage)
+    const safeCurrentPage = currentPage > totalPages ? 1 : currentPage
+
+    const indexOfLastCategory = safeCurrentPage * categoriesPerPage
+    const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage
+    const currentCategories = filteredCategories.slice(indexOfFirstCategory, indexOfLastCategory)
+
     useEffect(() => {
-        handleFetchCategories();
+        handleFetchCategories()
     }, [])
 
-    // ✅ Pagination Logic
-    const indexOfLastCategory = currentPage * categoriesPerPage
-    const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage
-    const currentCategories = Categories.slice(indexOfFirstCategory, indexOfLastCategory)
-    const totalPages = Math.ceil(Categories.length / categoriesPerPage)
-
     return (
-        <div className='w-100 '>
+        <>
+            {loading && <Spinner fullScreen={true} />}
 
-            {togglePopup &&
-                <Popup
-                    setTogglePopup={setTogglePopup}
-                    name={popupData?.categoryName}
-                    handleDelete={handleDelete}
-                />
-            }
+            <div className='w-100'>
+                {togglePopup &&
+                    <Popup
+                        setTogglePopup={setTogglePopup}
+                        name={popupData?.categoryName}
+                        handleDelete={handleDelete}
+                    />
+                }
 
-            <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
-                <h1 className='my-5 login-title'>All Categories</h1>
+                <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
+                    <h1 className='mt-5 login-title'>All Categories</h1>
 
-                <table className="premium-table w-100">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Category</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                    <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
+                        <input
+                            className='w-50 input-search-box'
+                            type='text'
+                            placeholder='Search categories...'
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value)
+                                setCurrentPage(1)
+                            }}
+                        />
+                        <Link to="/admin/addcategory" className='btn add-btn'>
+                            Add Category
+                        </Link>
+                    </div>
 
-                    <tbody>
-                        {currentCategories.length === 0 ? (
+                    <table className="premium-table w-100">
+                        <thead>
                             <tr>
-                                <td colSpan={3} className="text-center login-title">
-                                    No data found
-                                </td>
+                                <th>No</th>
+                                <th>Category</th>
+                                <th>Action</th>
                             </tr>
-                        ) : (
-                            currentCategories.map((cat, index) => (
-                                <tr key={cat._id}>
-                                    <td>{indexOfFirstCategory + index + 1}</td>
-                                    <td>{cat.categoryName}</td>
-                                    <td>
-                                        <MdDelete
-                                            size={20}
-                                            className="me-3 action-icon"
-                                            onClick={() => handlePopup(cat)}
-                                        />
-                                        <Link to={`/admin/editcategory/${cat._id}`} className='text-black'>
-                                            <MdEdit
-                                                size={20}
-                                                className="action-icon"
-                                            />
-                                        </Link>
+                        </thead>
+
+                        <tbody>
+                            {currentCategories.length === 0 ? (
+                                <tr>
+                                    <td colSpan={3} className="text-center login-title">
+                                        No data found
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                currentCategories.map((cat, index) => (
+                                    <tr key={cat._id}>
+                                        <td>{indexOfFirstCategory + index + 1}</td>
+                                        <td>{cat.categoryName}</td>
+                                        <td>
+                                            <MdDelete
+                                                size={20}
+                                                className="me-3 action-icon"
+                                                onClick={() => handlePopup(cat)}
+                                            />
+                                            <Link to={`/admin/editcategory/${cat._id}`} className='text-black'>
+                                                <MdEdit size={20} className="action-icon" />
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-                {/* ✅ Bootstrap Pagination */}
-                {totalPages > 1 && (
-                    <nav className="mt-4">
-                        <ul className="pagination justify-content-center">
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-center align-items-center mt-4">
 
-                            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => setCurrentPage(currentPage - 1)}
-                                >
-                                    Previous
-                                </button>
-                            </li>
+                            <button
+                                className="pagination-btn me-3"
+                                disabled={safeCurrentPage === 1}
+                                onClick={() => setCurrentPage(prev => prev - 1)}
+                            >
+                                Prev
+                            </button>
 
-                            {[...Array(totalPages)].map((_, index) => (
-                                <li
-                                    key={index}
-                                    className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
-                                >
-                                    <button
-                                        className="page-link"
-                                        onClick={() => setCurrentPage(index + 1)}
-                                    >
-                                        {index + 1}
-                                    </button>
-                                </li>
-                            ))}
+                            <span className="color-primary fw-bold">
+                                Page {safeCurrentPage} of {totalPages}
+                            </span>
 
-                            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                >
-                                    Next
-                                </button>
-                            </li>
+                            <button
+                                className="pagination-btn ms-3"
+                                disabled={safeCurrentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                            >
+                                Next
+                            </button>
 
-                        </ul>
-                    </nav>
-                )}
-
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
