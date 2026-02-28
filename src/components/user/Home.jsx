@@ -9,6 +9,9 @@ const Home = () => {
     const [categories, setCategories] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(false)
+    const [cart, setCart] = useState([]);
+    const [popup, setPopup] = useState(false)
+    const [successMesage, setSuccessMessage] = useState(null)
 
     const [currentPage, setCurrentPage] = useState(1)
     const productsPerPage = 10
@@ -58,31 +61,120 @@ const Home = () => {
         }
     };
 
-    // ✅ Search Filter
+    //  Search Filter
     const filteredProducts = product.filter((p) =>
         p.productName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // ✅ Pagination Logic
+    //  Pagination Logic
     const indexOfLastProduct = currentPage * productsPerPage
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage
     const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
 
+
+    // total amount calculation for frontend showing
+    const totalAmount = cart.reduce((total, item) => {
+        const productDetails = product.find(p => p._id === item.productId);
+        return total + (productDetails?.productPrice || 0) * item.quantity;
+    }, 0);
+
+
+    const handleIncrease = (product) => {
+        setCart(prevCart => {
+            const existing = prevCart.find(item => item.productId === product._id);
+
+            if (existing) {
+                return prevCart.map(item =>
+                    item.productId === product._id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            } else {
+                return [...prevCart, {
+                    productId: product._id,
+                    quantity: 1
+                }];
+            }
+        });
+    };
+
+
+    const handleDecrease = (productId) => {
+        setCart(prevCart =>
+            prevCart
+                .map(item =>
+                    item.productId === productId
+                        ? { ...item, quantity: item.quantity - 1 }
+                        : item
+                )
+                .filter(item => item.quantity > 0)
+        );
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setLoading(true)
+            const res = await commonApi({
+                method: "POST",
+                endpoint: "api/order/",
+                data: { products: cart }
+            });
+            handleSuccessPopup(res.data.data)
+            setCart([])
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong");
+            }
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+
+    const handleSuccessPopup = (data) => {
+        setSuccessMessage(data.totalPrice)
+        setPopup(true)
+    }
+
+
+
     useEffect(() => {
         handleFetchProduct()
         handleFetchCategory()
     }, [])
 
+
+
     return (
         <>
+
+            {popup && (
+                <div className="position-fixed top-0 start-0 w-100 d-flex justify-content-center align-items-center  vh-100 " style={{ background: "rgba(0, 0, 0, 0.6)", zIndex: 9999 }}>
+                    <div className="col-12 col-md-6">
+                        <div className="success-popup d-flex flex-column align-items-center p-5"><p className='m-0'>Order placed successfully!</p><p> Total Price: ₹ <b>{successMesage}</b></p>
+
+                            <span className='success-span ' onClick={() => setPopup(false)}>Close</span>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            )}
+
             {loading && <Spinner fullScreen={true} />}
             <div className="container mt-5">
 
                 <div className='col-12 mb-4'>
                     <h1 className="text-center color-primary">All Products</h1>
                 </div>
+
+
 
                 <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap">
 
@@ -109,6 +201,13 @@ const Home = () => {
                         ))}
                     </select>
 
+                    {cart.length > 0 && (
+                        <div className='d-flex gap-2 align-items-center'>
+                            <span className='btn add-btn' onClick={handleSubmit}>Submit</span>
+                            <span className='btn add-btn'>Total: ₹{totalAmount}</span>
+                        </div>
+                    )}
+
                 </div>
 
 
@@ -118,15 +217,28 @@ const Home = () => {
                         <p className="text-center color-primary">No products found.</p>
                     ) : (
                         currentProducts.map((p) => (
+
                             <div key={p._id} className="col-10 col-md-4 col-lg-3 mb-4">
                                 <div
-                                    className="p-3 rounded shadow text-white bg-color-primary"                            >
+                                    className="p-3 text-center rounded shadow text-white bg-color-primary"                            >
                                     <h5>{p.productName}</h5>
-                                    <p className="mb-1">Original Price : ₹ {p.originalPrice ? p.originalPrice : "----"}</p>
-                                    <p className="mb-1">Sale Price : ₹ {p.productPrice}</p>
+                                    <p className="mb-1"> Price : ₹ {p.productPrice}</p>
                                     <small>{p.category?.categoryName}</small>
+
+                                    <div className='d-flex justify-content-center align-items-center mt-3 gap-2'>
+                                        <button className='btn btn-sm btn-light fw-bold px-3' onClick={() => handleDecrease(p._id)}>-</button>
+                                        <span>
+                                            {cart.find(item => item.productId === p._id)?.quantity || 0}
+                                        </span>
+                                        <button className='btn btn-sm btn-light fw-bold px-3' onClick={() => handleIncrease(p)}>+</button>
+                                    </div>
                                 </div>
+
+
                             </div>
+
+
+
                         ))
                     )}
 

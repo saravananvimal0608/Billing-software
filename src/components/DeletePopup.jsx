@@ -2,7 +2,7 @@ import React from 'react'
 import { IoMdClose } from "react-icons/io";
 import '../css/Popup.css';
 
-const Popup = ({ setTogglePopup, name, handleDelete }) => {
+const DeletePopup = ({ setTogglePopup, name, handleDelete }) => {
 
     return (
         <div className='popup-overlay'>
@@ -24,4 +24,4 @@ const Popup = ({ setTogglePopup, name, handleDelete }) => {
     )
 }
 
-export default Popup
+export default DeletePopup

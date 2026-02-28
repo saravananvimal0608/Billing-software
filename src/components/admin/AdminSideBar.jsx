@@ -1,20 +1,22 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import ElectronicImg from '../../assets/electro.jpg'
+import { NavLink } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { fetDetails } from '../../slice/shopSlice';
+import Logout from '../../common/logout';
 
 const AdminSideBar = ({ setToggle }) => {
-    const navigate = useNavigate();
+    const details = useSelector((state) => state?.fetchDetails?.data?.data?.data)
+    const dispatch = useDispatch()
 
-    const handleLogout = () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            localStorage.removeItem("token");
-        }
-        navigate("/");
-    }
+
+    useEffect(() => {
+        dispatch(fetDetails())
+    }, [])
+
     return (
         <div className=' admin-side-bar-wrapper bg-primary-main'>
             <div>
-                <div className=' p-3'><div className='d-flex justify-content-around align-items-center text-white shop-title'><img src={ElectronicImg} className='electro-img' /><p className='m-0'><b>  Ramji Electronic</b></p> </div></div>
+                <div className=' p-3'><div className=' text-center p-2 text-white shop-title'><h6 className='m-0'><b>{details?.shopName}</b></h6> </div></div>
             </div>
             <NavLink
                 to="/admin"
@@ -86,14 +88,18 @@ const AdminSideBar = ({ setToggle }) => {
             >
                 All Users
             </NavLink>
-            <p
-                className="color-primary-main side-bar-content"
 
-                onClick={handleLogout}
+            <NavLink
+                to="/admin/orderhistory"
+                onClick={() => setToggle(false)}
+                className={({ isActive }) => `color-primary-main side-bar-content d-block text-decoration-none
+                  ${isActive ? 'admin-navbar-active' : ''}`
+                }
             >
-                Logout
-            </p>
+                Order History
+            </NavLink>
 
+            <Logout />
 
 
 

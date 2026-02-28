@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Popup from '../Popup'
+import Popup from '../DeletePopup.jsx'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from 'react-icons/md'
 import { Link } from 'react-router-dom'
@@ -70,106 +70,104 @@ const AllProduct = () => {
             {loading && <Spinner fullScreen={true} />}
             <div className='w-100'>
 
-            {togglePopup &&
-                <Popup
-                    setTogglePopup={setTogglePopup}
-                    name={popupData?.productName}
-                    handleDelete={handleDelete}
-                />
-            }
-
-            <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
-                <h1 className='mt-5 login-title'>All Products</h1>
-
-                <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
-                    <input
-                        className='w-50 input-search-box'
-                        type='text'
-                        placeholder='Search products...'
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value)
-                            setCurrentPage(1)
-                        }}
+                {togglePopup &&
+                    <Popup
+                        setTogglePopup={setTogglePopup}
+                        name={popupData?.productName}
+                        handleDelete={handleDelete}
                     />
-                    <Link to="/admin/addproduct" className='btn add-btn'>
-                        Add Product
-                    </Link>
-                </div>
+                }
 
-                <table className="premium-table w-100 all-product-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Products</th>
-                            <th>Original Price</th>
-                            <th>Price</th>
-                            <th>Category</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                <div className='text-center d-flex flex-column align-items-center w-100 p-3'>
+                    <h1 className='mt-5 login-title'>All Products</h1>
 
-                    <tbody>
-                        {currentProducts.length === 0 ? (
+                    <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
+                        <input
+                            className='w-50 input-search-box'
+                            type='text'
+                            placeholder='Search products...'
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value)
+                                setCurrentPage(1)
+                            }}
+                        />
+                        <Link to="/admin/addproduct" className='btn add-btn'>
+                            Add Product
+                        </Link>
+                    </div>
+
+                    <table className="premium-table w-100 all-product-table">
+                        <thead>
                             <tr>
-                                <td colSpan={5} className="text-center login-title">
-                                    No data found
-                                </td>
+                                <th>No</th>
+                                <th>Products</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                                <th>Action</th>
                             </tr>
-                        ) : (
-                            currentProducts.map((item, index) => (
-                                <tr key={item._id}>
-                                    <td>{indexOfFirstProduct + index + 1}</td>
-                                    <td>{item.productName ? item.productName : '----'}</td>
-                                    <td>{item.originalPrice ? item.originalPrice : "----"}</td>
-                                    <td>{item.productPrice ? item.productPrice : "----"}</td>
-                                    <td>{item.category?.categoryName ? item.category?.categoryName : '----'}</td>
-                                    <td>
-                                        <MdDelete
-                                            size={20}
-                                            className="me-md-3 action-icon"
-                                            onClick={() => handlePopup(item)}
-                                        />
-                                        <Link to={`/admin/editproduct/${item._id}`} className='text-black'>
-                                        <MdEdit
-                                            size={20}
-                                            className="action-icon"
-                                        />
-                                        </Link>
+                        </thead>
+
+                        <tbody>
+                            {currentProducts.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="text-center login-title">
+                                        No data found
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                currentProducts.map((item, index) => (
+                                    <tr key={item._id}>
+                                        <td>{indexOfFirstProduct + index + 1}</td>
+                                        <td>{item.productName ? item.productName : '----'}</td>
+                                        <td>{item.productPrice ? item.productPrice : "----"}</td>
+                                        <td>{item.category?.categoryName ? item.category?.categoryName : '----'}</td>
+                                        <td>
+                                            <MdDelete
+                                                size={20}
+                                                className="me-md-3 action-icon"
+                                                onClick={() => handlePopup(item)}
+                                            />
+                                            <Link to={`/admin/editproduct/${item._id}`} className='text-black'>
+                                                <MdEdit
+                                                    size={20}
+                                                    className="edit-icon"
+                                                />
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-center align-items-center mt-4">
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-center align-items-center mt-4">
 
-                    <button
-                        className="pagination-btn me-3"
-                        disabled={safeCurrentPage === 1}
-                        onClick={() => setCurrentPage(prev => prev - 1)}
-                    >
-                        Prev
-                    </button>
+                            <button
+                                className="pagination-btn me-3"
+                                disabled={safeCurrentPage === 1}
+                                onClick={() => setCurrentPage(prev => prev - 1)}
+                            >
+                                Prev
+                            </button>
 
-                    <span className="color-primary fw-bold">
-                        Page {safeCurrentPage} of {totalPages}
-                    </span>
+                            <span className="color-primary fw-bold">
+                                Page {safeCurrentPage} of {totalPages}
+                            </span>
 
-                    <button
-                        className="pagination-btn ms-3"
-                        disabled={safeCurrentPage === totalPages}
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                    >
-                        Next
-                    </button>
+                            <button
+                                className="pagination-btn ms-3"
+                                disabled={safeCurrentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                            >
+                                Next
+                            </button>
+
+                        </div>
+                    )}
 
                 </div>
-                )}
-
             </div>
-        </div>
         </>
     )
 }

@@ -26,13 +26,18 @@ const Login = () => {
 
             const token = res.data.token
             localStorage.setItem("token", token)
-            if (res.data.role) {
-                navigate('/admin')
-            }
-            else {
-                navigate('/user')
-            }
 
+
+
+
+            navigate(
+                res.data.role === "admin"
+                    ? "/admin"
+                    : res.data.role === "salesman"
+                        ? "/user"
+                        : "/superadmin"
+            );
+            
             toast.success("Login Successfully")
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {

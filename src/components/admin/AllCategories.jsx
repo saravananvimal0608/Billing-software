@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { MdDelete, MdEdit } from "react-icons/md";
-import Popup from '../Popup';
+import Popup from '../DeletePopup.jsx';
 import { Link } from 'react-router-dom';
 import { commonApi } from '../../common/common.js';
 import Spinner from '../Spinner.jsx';
@@ -128,8 +128,8 @@ const AllCategories = () => {
                                                 className="me-3 action-icon"
                                                 onClick={() => handlePopup(cat)}
                                             />
-                                            <Link to={`/admin/editcategory/${cat._id}`} className='text-black'>
-                                                <MdEdit size={20} className="action-icon" />
+                                            <Link to={`/admin/editcategory/${cat._id}`}>
+                                                <MdEdit size={20} className="edit-icon" />
                                             </Link>
                                         </td>
                                     </tr>

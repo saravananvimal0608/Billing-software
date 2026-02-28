@@ -45,7 +45,7 @@ const AddUser = () => {
         }
         try {
             setLoading(true)
-            const res = await commonApi({ method: "POST", endpoint: "api/users/create", data })
+            const res = await commonApi({ method: "POST", endpoint: "api/users/create/salesman", data })
             setLoading(false)
             toast.success(res.data.message);
             setData({ email: "", password: '' })
@@ -57,8 +57,6 @@ const AddUser = () => {
         }
 
     }
-
-
 
     return (
         <> {loading && <Spinner fullScreen={true} />}
