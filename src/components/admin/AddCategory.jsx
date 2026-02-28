@@ -17,15 +17,15 @@ const AddCategory = () => {
     const handleFetchCategoryById = async () => {
         try {
             setLoading(true)
-            const res = await commonApi({ method: "GET", endpoint: `api/category/single/${id}` })
-             setData({ categoryName: res.data.category.categoryName })
+            const res = await commonApi({ method: "GET", endpoint: `api/category/${id}` })
+            setData({ categoryName: res.data.category.categoryName })
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
         } finally {
             setLoading(false)
         }
 
-       
+
     }
 
     const handleError = () => {
@@ -83,35 +83,35 @@ const AddCategory = () => {
         <>
             {loading && <Spinner fullScreen={true} />}
             <div className="common-box">
-            <div className="login-card">
-                <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
-                <p className="login-subtitle">{id ? "Edit" : "Create a new"} product category</p>
+                <div className="login-card">
+                    <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
+                    <p className="login-subtitle">{id ? "Edit" : "Create a new"} product category</p>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className={` ${error.categoryName ? "border-danger" : ''}`}>Category Name</label>
-                        <input
-                            type="text"
-                            className={`form-input ${error.categoryName ? "border-danger" : ''}`}
-                            name="categoryName"
-                            value={data.categoryName}
-                            onChange={handleChange}
-                            placeholder="Enter category name"
-                            required
-                        />
-                        {error.categoryName && <p className="text-danger mt-2">{error.categoryName}</p>}
-                    </div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className={` ${error.categoryName ? "border-danger" : ''}`}>Category Name</label>
+                            <input
+                                type="text"
+                                className={`form-input ${error.categoryName ? "border-danger" : ''}`}
+                                name="categoryName"
+                                value={data.categoryName}
+                                onChange={handleChange}
+                                placeholder="Enter category name ex : Snacks"
+                                required
+                            />
+                            {error.categoryName && <p className="text-danger mt-2">{error.categoryName}</p>}
+                        </div>
 
-                    <button
-                        type="submit"
-                        disabled={!data.categoryName}
-                        className={data.categoryName ? "login-btn" : "disable-btn"}
-                    >
-                        {id ? "Edit Category" : "Add Category"}
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            disabled={!data.categoryName}
+                            className={data.categoryName ? "login-btn" : "disable-btn"}
+                        >
+                            {id ? "Edit Category" : "Add Category"}
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
         </>
     );
 }

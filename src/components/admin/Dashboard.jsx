@@ -6,6 +6,7 @@ import axios from 'axios';
 import ApexChart from '../admin/ApexChart';
 import ApexLine from '../admin/ApexLine'
 import { toast } from 'react-toastify';
+import { commonApi } from '../../common/common';
 
 const Dashboard = () => {
     const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -18,7 +19,7 @@ const Dashboard = () => {
 
     const handleUserCount = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/users/allUser`)
+            const res = await commonApi({ endpoint: "api/users/allUser" })
             setData(res.data.data)
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
@@ -63,17 +64,13 @@ const Dashboard = () => {
         }
     }
 
-    const filteredUsers = data.filter(user => user.role === false)
+    const filteredUsers = data.filter(user => user.role === "salesman")
 
     useEffect(() => {
         handleUserCount()
         handleCategoryCount()
         handleProductCount()
     }, [])
-
-
-    console.log(data);
-
 
     return (
         <div className='w-100'>

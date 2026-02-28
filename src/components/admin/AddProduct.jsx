@@ -7,7 +7,7 @@ import Spinner from "../Spinner.jsx";
 
 const AddProduct = () => {
 
-    const [data, setData] = useState({ productName: "", originalPrice: "", productPrice: "", category: "" })
+    const [data, setData] = useState({ productName: "", productPrice: "", category: "" })
     const [categories, setCategories] = useState([])
     const [error, setError] = useState({})
     const [loading, setLoading] = useState(false)
@@ -19,13 +19,12 @@ const AddProduct = () => {
         try {
             setLoading(true)
             const res = await commonApi({ method: "GET", endpoint: `api/product/${id}` })
-            console.log(res);
+            console.log(res.data.product);
 
             setData({
-                productName: res.data.productName || "",
-                originalPrice: res.data.originalPrice || "",
-                productPrice: res.data.productPrice || "",
-                category: res.data.category?._id || ""
+                productName: res.data.product.productName || "",
+                productPrice: res.data.product.productPrice || "",
+                category: res.data.product.category?._id || ""
             })
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong")
@@ -40,12 +39,6 @@ const AddProduct = () => {
 
         if (!data.productName) {
             errorMessages.productName = "Product name is required";
-        }
-
-        if (!data.originalPrice) {
-            errorMessages.originalPrice = "Original price is required";
-        } else if (isNaN(data.originalPrice) || Number(data.originalPrice) <= 0) {
-            errorMessages.originalPrice = "Original price must be a positive number";
         }
 
         if (!data.productPrice) {
@@ -143,26 +136,6 @@ const AddProduct = () => {
                         </div>
 
                         <div className="form-group">
-                            <label className={` ${error.originalPrice ? "border-danger" : ''}`}>Original Price</label>
-                            <input
-                                type="number"
-                                className={`form-input ${error.originalPrice ? "border-danger" : ''}`}
-                                name="originalPrice"
-                                value={data.originalPrice}
-                                onChange={handleChange}
-                                onKeyDown={(e) => {
-                                    if (["e", "E", "+", "-"].includes(e.key)) {
-                                        e.preventDefault();
-                                    }
-                                }}
-                                placeholder="Enter Product Name"
-                                required
-                            />
-                            {error.originalPrice && <p className="text-danger mt-2">{error.originalPrice}</p>}
-                        </div>
-
-
-                        <div className="form-group">
                             <label className={` ${error.productPrice ? "border-danger" : ''}`}>Product Price</label>
                             <input
                                 type="number"
@@ -192,7 +165,7 @@ const AddProduct = () => {
                             >
                                 <option value="">Select Category</option>
                                 {categories.map((cat) => (
-                                    <option key={cat._id} value={cat._id}>
+                                    <option key={cat._id} value={cat._id} className="options">
                                         {cat.categoryName}
                                     </option>
                                 ))}
