@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import { commonApi } from '../../common/common';
 import Spinner from '../Spinner.jsx';
+import { IoClose } from "react-icons/io5";
+import '../../css/Popup.css';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Home = () => {
 
@@ -14,13 +18,20 @@ const Home = () => {
     const [successMesage, setSuccessMessage] = useState(null)
 
     const [currentPage, setCurrentPage] = useState(1)
-    const productsPerPage = 10
+    const [totalPages, setTotalPages] = useState(1)
 
-    const handleFetchProduct = async () => {
+    const handleFetchProduct = async (page, search) => {
         try {
             setLoading(true)
-            const res = await commonApi({ method: "GET", endpoint: "api/product/" })
-            setProduct(res.data)
+            const res = await commonApi({
+                method: "GET",
+                endpoint: `api/product?page=${page}&search=${search}`
+            })
+            console.log('res', res.data);
+
+            setProduct(res.data.products)
+            setTotalPages(res.data.totalPages)
+
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
@@ -31,8 +42,8 @@ const Home = () => {
     const handleFetchCategory = async () => {
         try {
             setLoading(true)
-            const res = await commonApi({ method: "GET", endpoint: "api/category/" })
-            setCategories(res.data)
+            const res = await commonApi({ method: "GET", endpoint: "api/category/withoutPagination" })
+            setCategories(res.data.categories)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
@@ -45,7 +56,7 @@ const Home = () => {
         setCurrentPage(1)
 
         if (!categoryId) {
-            handleFetchProduct();
+            handleFetchProduct(1, searchTerm);
             return;
         }
 
@@ -65,13 +76,6 @@ const Home = () => {
     const filteredProducts = product.filter((p) =>
         p.productName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    //  Pagination Logic
-    const indexOfLastProduct = currentPage * productsPerPage
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
-
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
 
 
     // total amount calculation for frontend showing
@@ -124,11 +128,7 @@ const Home = () => {
             handleSuccessPopup(res.data.data)
             setCart([])
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         }
         finally {
             setLoading(false)
@@ -142,11 +142,13 @@ const Home = () => {
     }
 
 
-
     useEffect(() => {
-        handleFetchProduct()
         handleFetchCategory()
     }, [])
+
+    useEffect(() => {
+        handleFetchProduct(currentPage, searchTerm)
+    }, [currentPage, searchTerm])
 
 
 
@@ -161,8 +163,6 @@ const Home = () => {
                             <span className='success-span ' onClick={() => setPopup(false)}>Close</span>
 
                         </div>
-
-
                     </div>
                 </div>
             )}
@@ -196,7 +196,7 @@ const Home = () => {
                         <option value="">Select Category</option>
                         {categories.map((cat) => (
                             <option key={cat._id} value={cat._id}>
-                                {cat.categoryName}
+                                {cat.categoryName.length > 20 ? cat.categoryName.slice(0, 20) + "..." : cat.categoryName}
                             </option>
                         ))}
                     </select>
@@ -213,10 +213,10 @@ const Home = () => {
 
                 <div className="row justify-content-center">
 
-                    {currentProducts.length === 0 ? (
+                    {filteredProducts.length === 0 ? (
                         <p className="text-center color-primary">No products found.</p>
                     ) : (
-                        currentProducts.map((p) => (
+                        filteredProducts.map((p) => (
 
                             <div key={p._id} className="col-10 col-md-4 col-lg-3 mb-4">
                                 <div

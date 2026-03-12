@@ -5,7 +5,7 @@ import '../css/Popup.css';
 const DeletePopup = ({ setTogglePopup, name, handleDelete }) => {
 
     return (
-        <div className='popup-overlay'>
+        <div className='popup-overlay' onClick={() => setTogglePopup(false)}   >
             <div className='popup-box'>
                 <div className='popup-header'>
                     <h4>Delete Modal</h4>

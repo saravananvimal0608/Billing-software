@@ -19,6 +19,7 @@ import Main from './components/user/Main';
 import Home from './components/user/Home';
 import ResetPassword from './components/ResetPassword';
 import OrderHistory from './components/admin/OrderHistory';
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/admin" element={<AdminProtectedRoute> <AdminDashboard /> </AdminProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path='adduser' element={<AddUser />} />
+            <Route path='edituser/:id' element={<AddUser />} />
             <Route path='addcategory' element={<AddCategory />} />
             <Route path='editcategory/:id' element={<AddCategory />} />
             <Route path='addproduct' element={<AddProduct />} />

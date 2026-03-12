@@ -59,12 +59,7 @@ const AddCategory = () => {
                 navigate("/admin/allcategories");
             }
         } catch (error) {
-
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
 
         } finally {
             setLoading(false)
@@ -82,7 +77,7 @@ const AddCategory = () => {
     return (
         <>
             {loading && <Spinner fullScreen={true} />}
-            <div className="common-box">
+            <div className="common-box container">
                 <div className="login-card">
                     <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
                     <p className="login-subtitle">{id ? "Edit" : "Create a new"} product category</p>

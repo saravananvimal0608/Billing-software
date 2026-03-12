@@ -5,7 +5,25 @@
 
 .admin-side-bar-wrapper {
     width: 250px;
-    height: 100vh
+    height: 100vh;
+    overflow-y: scroll;
+}
+
+
+.admin-side-bar-wrapper::-webkit-scrollbar {
+    width: 7px;
+}
+
+.admin-side-bar-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.admin-side-bar-wrapper::-webkit-scrollbar-thumb {
+    background: #5F4A8B;
+}
+
+.admin-side-bar-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #5F4A8B;
 }
 
 .side-bar-content {
@@ -247,6 +265,42 @@
     color: #5F4A8B !important
 }
 
+.elipsis-common {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 200px;
+}
+
+.admin-logo {
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.popup-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 190px;
+}
+
+.popup-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+
+.popup-body::-webkit-scrollbar-thumb {
+    background: #5F4A8B;
+    border-radius: 10px;
+}
+
+.popup-body::-webkit-scrollbar-thumb:hover {
+    background: #5F4A8B;
+}
+
 .shop-title {
     border-radius: 10px;
     padding: 2px;
@@ -271,7 +325,15 @@
 
 .input-search-box {
     border-radius: 10px;
-    border: 2px solid #10325B
+    border: 3px solid #E0E0E0;
+    background-color: #F8F9FA;
+    cursor: pointer
+}
+
+.input-search-box:focus {
+    border-color: #5F4A8B;
+    outline: none;
+    background-color: #ffffff;
 }
 
 .spinner-container {
@@ -320,4 +382,57 @@
 
 .success-span:hover {
     transform: scale(1.1);
+}
+
+.download-btn {
+    border: 1px solid #5F4A8B;
+    background: var(--secondary-gradient);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(95, 74, 139, 0.2);
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(95, 74, 139, 0.3);
+}
+
+.download-btn-option {
+    background: var(--secondary-gradient);
+    border: 1px solid #5F4A8B;
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+    position: absolute;
+    top: 45px;
+    right: 0;
+    z-index: 1000;
+    min-width: 180px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.download-btn-option span {
+    display: block;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.download-btn-option span:last-child {
+    margin-bottom: 0;
+}
+
+.download-btn-option span:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+    transform: translateX(5px);
 }

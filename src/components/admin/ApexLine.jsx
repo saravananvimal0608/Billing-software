@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-const ApexLine = ({ userCount = 0, productCount = 0, categoryCount = 0 }) => {
+const ApexLine = ({ totalRevenue = 0, productCount = 0, categoryCount = 0 }) => {
     const [state] = React.useState({
         series: [
             {
-                name: 'Users',
-                data: [userCount]
+                name: 'Total Revenue',
+                data: [totalRevenue]
             },
             {
                 name: 'Products',
@@ -61,15 +61,15 @@ const ApexLine = ({ userCount = 0, productCount = 0, categoryCount = 0 }) => {
     return (
         <div>
             <div id="chart">
-                <ReactApexChart 
-                    options={state.options} 
+                <ReactApexChart
+                    options={state.options}
                     series={[
-                        { name: 'Users', data: [userCount] },
+                        { name: 'Revenue', data: [totalRevenue] },
                         { name: 'Products', data: [productCount] },
                         { name: 'Categories', data: [categoryCount] }
-                    ]} 
-                    type="line" 
-                    height={350} 
+                    ]}
+                    type="line"
+                    height={350}
                 />
             </div>
         </div>
