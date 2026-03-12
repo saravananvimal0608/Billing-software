@@ -40,11 +40,7 @@ const Login = () => {
             
             toast.success("Login Successfully")
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+          toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false)
         }

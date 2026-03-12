@@ -19,7 +19,6 @@ const AddProduct = () => {
         try {
             setLoading(true)
             const res = await commonApi({ method: "GET", endpoint: `api/product/${id}` })
-            console.log(res.data.product);
 
             setData({
                 productName: res.data.product.productName || "",
@@ -75,11 +74,7 @@ const AddProduct = () => {
                 navigate("/admin/allproducts");
             }
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false)
         }
@@ -88,14 +83,10 @@ const AddProduct = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true)
-            const response = await commonApi({ method: "GET", endpoint: "api/category/" });
-            setCategories(response.data);
+            const res = await commonApi({ endpoint: "api/category/withoutPagination" })
+            setCategories(res.data.categories);
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false)
         }
@@ -115,7 +106,7 @@ const AddProduct = () => {
     return (
         <>
             {loading && <Spinner fullScreen={true} />}
-            <div className="common-box my-5">
+            <div className="common-box my-5 container">
                 <div className="login-card">
                     <h2 className="login-title">{id ? "Edit" : "Add"} Product</h2>
                     <p className={`login-subtitle ${id ? "d-none" : "d-block"}`} >Create a new product</p>
@@ -133,6 +124,29 @@ const AddProduct = () => {
                                 required
                             />
                             {error.productName && <p className="text-danger mt-2">{error.productName}</p>}
+                        </div>
+
+                        <div className="form-group">
+                            <label className={` ${error.category ? "border-danger" : ''}`}>Product Category</label>
+                            <select
+                                className={`form-input  ${error.category ? "border-danger" : ''}`}
+                                name="category"
+                                value={data.category}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="" >Select Category</option>
+                                {categories.map((cat) => (
+                                    <option key={cat._id} value={cat._id} className="options elipsis-common">
+                                        <option key={cat._id} value={cat._id}>
+                                            {cat.categoryName.length > 20
+                                                ? cat.categoryName.slice(0, 20) + "..."
+                                                : cat.categoryName}
+                                        </option>
+                                    </option>
+                                ))}
+                            </select>
+                            {error.category && <p className="text-danger mt-2">{error.category}</p>}
                         </div>
 
                         <div className="form-group">
@@ -154,24 +168,7 @@ const AddProduct = () => {
                             {error.productPrice && <p className="text-danger mt-2">{error.productPrice}</p>}
                         </div>
 
-                        <div className="form-group">
-                            <label className={` ${error.category ? "border-danger" : ''}`}>Product Category</label>
-                            <select
-                                className={`form-input ${error.category ? "border-danger" : ''}`}
-                                name="category"
-                                value={data.category}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map((cat) => (
-                                    <option key={cat._id} value={cat._id} className="options">
-                                        {cat.categoryName}
-                                    </option>
-                                ))}
-                            </select>
-                            {error.category && <p className="text-danger mt-2">{error.category}</p>}
-                        </div>
+
 
                         <button
                             type="submit"

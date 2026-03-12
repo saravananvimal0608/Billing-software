@@ -7,25 +7,23 @@ export const commonApi = async ({
     endpoint,
     data = null,
     params = null,
-    headers = {}
+    headers = {},
+    responseType = "json"
 }) => {
-    try {
-        const token = localStorage.getItem("token");
 
-        const response = await axios({
-            method,
-            url: `${baseURL}${endpoint}`,
-            data,
-            params,
-            headers: {
-                Authorization: token ? `Bearer ${token}` : "",
-                ...headers
-            }
-        });
+    const token = localStorage.getItem("token");
 
-        return response;
+    const response = await axios({
+        method,
+        url: `${baseURL}${endpoint}`,
+        data,
+        params,
+        responseType,
+        headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            ...headers
+        }
+    });
 
-    } catch (error) {
-        throw error || { message: "Something went wrong" };
-    }
+    return response;
 };

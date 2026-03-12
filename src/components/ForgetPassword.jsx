@@ -42,11 +42,7 @@ const ForgetPassword = () => {
 
             toast.success(res.data.message)
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false)
         }
@@ -61,7 +57,7 @@ const ForgetPassword = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={` ${error.email ? "border-danger" : ''}`}>Enter Email</label>
-                            <input type="email" className={`form-input ${error.email ? "border-danger" : ''}`}  name="email" value={data.email} onChange={handleChange} placeholder="Your email" required />
+                            <input type="email" className={`form-input ${error.email ? "border-danger" : ''}`} name="email" value={data.email} onChange={handleChange} placeholder="Your email" required />
                             {error.email ? <p className="text-danger mt-2">{error.email}</p> : ""}
                         </div>
 

@@ -4,6 +4,8 @@ import '../css/Login.css';
 import { useNavigate } from "react-router-dom";
 import { commonApi } from "../common/common.js";
 import Spinner from "./Spinner.jsx";
+import { FaEyeSlash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 
 const ResetPassword = () => {
 
@@ -11,6 +13,8 @@ const ResetPassword = () => {
     const [otp, setOtp] = useState("")
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const [toggle, setToggle] = useState(false)
+
 
 
     const handleChange = (e) => {
@@ -26,11 +30,7 @@ const ResetPassword = () => {
 
             toast.success(res.data.message)
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false)
         }
@@ -61,14 +61,20 @@ const ResetPassword = () => {
 
                         <div className="form-group">
                             <label>Enter New Password</label>
-                            <input type="password" className="form-input" name="password" value={data.password} onChange={handleChange} placeholder="Your password" required />
+                            <div className="position-relative">
+                                <input type={toggle ? "text" : "password"} className="form-input" name="password" value={data.password} onChange={handleChange} placeholder="Your password" required />
+                                <span className="position-absolute" style={{ right: "15px", top: "12px", }} onClick={() => setToggle(!toggle)} >
+                                    {toggle ? <FaEye /> : <FaEyeSlash />}
+                                </span>
+                            </div>
+
                         </div>
 
                         <button type="submit" className={data.password ? "login-btn" : "disable-btn"} disabled={!data.password}>Change Password</button>
 
                     </form>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     )
 }

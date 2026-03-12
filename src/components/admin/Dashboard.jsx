@@ -1,76 +1,53 @@
 import React, { useEffect, useState } from 'react'
-import { FaUsers } from "react-icons/fa";
+import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 import { AiOutlineProduct } from "react-icons/ai";
 import { MdCategory } from "react-icons/md";
-import axios from 'axios';
 import ApexChart from '../admin/ApexChart';
 import ApexLine from '../admin/ApexLine'
 import { toast } from 'react-toastify';
 import { commonApi } from '../../common/common';
 
 const Dashboard = () => {
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-    const [data, setData] = useState([])
     const [categories, setCategories] = useState([])
     const [products, setProducts] = useState([])
-    const token = localStorage.getItem("token");
+    const [totalRevenue, setTotalRevenue] = useState(null)
 
 
 
-    const handleUserCount = async () => {
+    const handleRevenue = async () => {
         try {
-            const res = await commonApi({ endpoint: "api/users/allUser" })
-            setData(res.data.data)
+            const res = await commonApi({ endpoint: "api/order/" })
+            setTotalRevenue(res?.data);
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+            toast.error(error.response?.data?.message || "Something went wrong");
         }
     }
 
     const handleCategoryCount = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/category/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            setCategories(res.data)
+            const res = await commonApi({ endpoint: "api/category/withoutPagination" })
+            setCategories(res.data.categories)
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+              toast.error(error.response?.data?.message || "Something went wrong");
         }
     }
 
     const handleProductCount = async () => {
         try {
-            const res = await axios.get(`${baseUrl}api/product/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            setProducts(res.data)
+            const res = await commonApi({ endpoint: "api/product/withoutPagination" })
+            setProducts(res.data.products)
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
+         toast.error(error.response?.data?.message || "Something went wrong");
         }
     }
 
-    const filteredUsers = data.filter(user => user.role === "salesman")
-
     useEffect(() => {
-        handleUserCount()
+        handleRevenue()
         handleCategoryCount()
         handleProductCount()
     }, [])
+
+
 
     return (
         <div className='w-100'>
@@ -82,11 +59,11 @@ const Dashboard = () => {
 
 
                     <div >
-                        <p className='m-0'>Total Users</p>
-                        <p>{filteredUsers ? filteredUsers.length : "---"}</p>
+                        <p className='m-0'>Total Revenue</p>
+                        <p>$ {totalRevenue?.totalRevenue ? totalRevenue?.totalRevenue : "---"}</p>
                     </div>
                     <div>
-                        <FaUsers size={50} className='icon-symbol' />
+                        <RiMoneyRupeeCircleFill size={50} className='icon-symbol' />
                     </div>
 
                 </div>
@@ -121,14 +98,14 @@ const Dashboard = () => {
             <div className='row mt-1 justify-content-center gap-2'>
                 <div className='col-10 col-md-7 col-lg-5 mb-4 apex-chart-border'>
                     <ApexChart
-                        userCount={filteredUsers.length}
+                        totalRevenue={totalRevenue?.totalRevenue}
                         productCount={products.length}
                         categoryCount={categories.length}
                     />
                 </div>
                 <div className='col-10 col-md-7 col-lg-5 mb-4 apex-chart-border'>
                     <ApexLine
-                        userCount={filteredUsers.length}
+                        totalRevenue={totalRevenue?.totalRevenue}
                         productCount={products.length}
                         categoryCount={categories.length}
                     />
