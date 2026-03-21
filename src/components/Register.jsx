@@ -8,7 +8,7 @@ import { commonApi } from "../common/common.js";
 import Spinner from "./Spinner.jsx";
 import mainImg from '../assets/cotechies-logo.jpeg'
 
-const Login = () => {
+const Register = () => {
   const [data, setData] = useState({ email: "", password: "" });
   const [toggle, setToggle] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,6 +55,32 @@ const Login = () => {
 
       <div className="login-container">
 
+        {/* Left - Image Panel */}
+        <div className="login-image-panel">
+          <img src={mainImg} alt="Brand Logo" className="login-brand-logo" />
+          <h2 className="login-brand-title">Smart Billing Solution</h2>
+          <p className="login-brand-sub">Manage your sales, products, and reports all in one place. Fast, secure, and built for your business.</p>
+          <div className="login-brand-features">
+            <div className="login-feature-item">
+              <span>📦</span>
+              <span>Product & Category Management</span>
+            </div>
+            <div className="login-feature-item">
+              <span>📊</span>
+              <span>Sales Reports & Analytics</span>
+            </div>
+            <div className="login-feature-item">
+              <span>🧾</span>
+              <span>Invoice & Order History</span>
+            </div>
+            <div className="login-feature-item">
+              <span>👥</span>
+              <span>Multi-user Role Access</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right - Form Panel */}
         <div className="login-card">
           <h2 className="login-title">Welcome Back</h2>
           <p className="login-subtitle">Please login to your account</p>
@@ -111,4 +137,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

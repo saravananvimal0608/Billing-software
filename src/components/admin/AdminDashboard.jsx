@@ -1,39 +1,115 @@
-import React, { useState } from 'react'
-import AdminSideBar from './AdminSideBar'
-import { Outlet } from 'react-router-dom'
-import { IoReorderThree } from "react-icons/io5";
-
+import React, { useEffect, useState } from "react";
+import { RiMoneyRupeeCircleFill } from "react-icons/ri";
+import { AiOutlineProduct } from "react-icons/ai";
+import { MdCategory } from "react-icons/md";
+import ApexChart from "./ApexChart";
+import ApexLine from "./ApexLine";
+import { toast } from "react-toastify";
+import { commonApi } from "../../common/common";
 
 const AdminDashboard = () => {
-    const [toggle, setToggle] = useState(false)
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(null);
 
-    return (
-        <div className='d-flex position-relative vh-100 overflow-hidden'>
-            <div className={`${toggle ? "mobile-view-active" : 'mobile-view'}`}>
-                <AdminSideBar setToggle={setToggle} />
-            </div>
+  const handleRevenue = async () => {
+    try {
+      const res = await commonApi({ endpoint: "api/order/" });
+      setTotalRevenue(res?.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
 
-            <IoReorderThree
-                className='three-dot'
-                size={40}
-                onClick={() => setToggle(true)}
-            />
+  const handleCategoryCount = async () => {
+    try {
+      const res = await commonApi({
+        endpoint: "api/category/withoutPagination",
+      });
+      setCategories(res.data.categories);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
 
-            {toggle && (
-                <div
-                    className="sidebar-overlay"
-                    onClick={() => setToggle(false)}
-                ></div>
-            )}
+  const handleProductCount = async () => {
+    try {
+      const res = await commonApi({
+        endpoint: "api/product/withoutPagination",
+      });
+      setProducts(res.data.products);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
 
+  useEffect(() => {
+    handleRevenue();
+    handleCategoryCount();
+    handleProductCount();
+  }, []);
 
-            <div className='flex-grow-1 overflow-auto'>
-                <Outlet />
-            </div>
+  return (
+    <div className="w-100">
+      <div className="order-history-header mx-1 my-4">
+        <h1 className="order-history-title">Admin Dashboard</h1>
+      </div>
 
-
+      <div className="row justify-content-evenly">
+        <div className="col-10 col-md-3  mb-3 dashboard-box d-flex justify-content-around align-items-center">
+          <div>
+            <p className="m-0">Total Revenue</p>
+            <p>
+              ${" "}
+              {totalRevenue?.totalRevenue ? totalRevenue?.totalRevenue : "---"}
+            </p>
+          </div>
+          <div>
+            <RiMoneyRupeeCircleFill size={50} className="icon-symbol" />
+          </div>
         </div>
-    )
-}
 
-export default AdminDashboard
+        <div className="col-10 col-md-3  mb-3 dashboard-box d-flex justify-content-around align-items-center">
+          <div>
+            {" "}
+            <p className="m-0">Total Products</p>
+            <p>{products ? products.length : "---"}</p>
+          </div>
+          <div>
+            <AiOutlineProduct size={50} className="icon-symbol" />
+          </div>
+        </div>
+
+        <div className="col-10 col-md-3  mb-3 dashboard-box d-flex justify-content-around align-items-center">
+          <div>
+            {" "}
+            <p className="m-0">Total Categories</p>
+            <p>{categories ? categories.length : "---"}</p>
+          </div>
+          <div>
+            <MdCategory size={50} className="icon-symbol" />
+          </div>
+        </div>
+      </div>
+
+      <div className="row mt-1 justify-content-center gap-2">
+        <div className="col-10 col-md-7 col-lg-5 mb-4 apex-chart-border">
+          <ApexChart
+            totalRevenue={totalRevenue?.totalRevenue}
+            productCount={products.length}
+            categoryCount={categories.length}
+          />
+        </div>
+        <div className="col-10 col-md-7 col-lg-5 mb-4 apex-chart-border">
+          <ApexLine
+            totalRevenue={totalRevenue?.totalRevenue}
+            productCount={products.length}
+            categoryCount={categories.length}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;

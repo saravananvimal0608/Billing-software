@@ -1,114 +1,134 @@
-import { useEffect, useState } from "react"
-import { toast } from 'react-toastify';
-import '../../css/Login.css';
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import "../../css/Login.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { commonApi } from "../../common/common.js";
 import Spinner from "../Spinner.jsx";
 
 const AddCategory = () => {
+  const [data, setData] = useState({ categoryName: "" });
+  const [error, setError] = useState({});
+  const [loading, setLoading] = useState(false);
+  const id = useParams().id;
+  const navigate = useNavigate();
 
-    const [data, setData] = useState({ categoryName: "", })
-    const [error, setError] = useState({})
-    const [loading, setLoading] = useState(false)
-    const id = useParams().id
-    const navigate = useNavigate()
-
-
-    const handleFetchCategoryById = async () => {
-        try {
-            setLoading(true)
-            const res = await commonApi({ method: "GET", endpoint: `api/category/${id}` })
-            setData({ categoryName: res.data.category.categoryName })
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Something went wrong")
-        } finally {
-            setLoading(false)
-        }
-
-
+  const handleFetchCategoryById = async () => {
+    try {
+      setLoading(true);
+      const res = await commonApi({
+        method: "GET",
+        endpoint: `api/category/${id}`,
+      });
+      setData({ categoryName: res.data.category.categoryName });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const handleError = () => {
-        const errorMessages = {}
+  const handleError = () => {
+    const errorMessages = {};
 
-        if (!data.categoryName.trim()) {
-            errorMessages.categoryName = "Category name is required";
-        }
-        setError(errorMessages)
-
-        return Object.keys(errorMessages).length === 0
+    if (!data.categoryName.trim()) {
+      errorMessages.categoryName = "Category name is required";
     }
+    setError(errorMessages);
 
-    const handleChange = (e) => {
-        setData({ ...data, [e.target.name]: e.target.value })
+    return Object.keys(errorMessages).length === 0;
+  };
+
+  const handleChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!handleError()) {
+      return;
     }
+    try {
+      setLoading(true);
+      const res = id
+        ? await commonApi({
+            method: "PUT",
+            endpoint: `api/category/${id}`,
+            data,
+          })
+        : await commonApi({
+            method: "POST",
+            endpoint: "api/category/add",
+            data,
+          });
+      toast.success(res.data.message);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-
-        if (!handleError()) {
-            return
-        }
-        try {
-            setLoading(true)
-            const res = id ? await commonApi({ method: "PUT", endpoint: `api/category/${id}`, data }) : await commonApi({ method: "POST", endpoint: "api/category/add", data });
-            toast.success(res.data.message);
-
-            if (!id) {
-                setData({ categoryName: "" });
-                navigate("/admin/allcategories");
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Something went wrong");
-
-        } finally {
-            setLoading(false)
-        }
-
+      if (!id) {
+        setData({ categoryName: "" });
+        navigate("/admin/allcategories");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
+    if (id) {
+      handleFetchCategoryById();
+    }
+  }, [id]);
 
-    useEffect(() => {
-        if (id) {
-            handleFetchCategoryById()
-        }
-    }, [id])
+  return (
+    <>
+      {loading && <Spinner fullScreen={true} />}
+      <div className="order-history-header mx-1 my-5 my-lg-3">
+        <h1 className="order-history-title">{id ? "Edit" : "Add"} Category</h1>
+        <p className="order-history-sub">
+          {id ? "Edit" : "Create a new"} product category
+        </p>
+      </div>
+      <div className="common-box container">
+        <div className="login-card">
+          <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
+          <p className="login-subtitle">
+            {id ? "Edit" : "Create a new"} product category
+          </p>
 
-    return (
-        <>
-            {loading && <Spinner fullScreen={true} />}
-            <div className="common-box container">
-                <div className="login-card">
-                    <h2 className="login-title">{id ? "Edit" : "Add"} Category</h2>
-                    <p className="login-subtitle">{id ? "Edit" : "Create a new"} product category</p>
-
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className={` ${error.categoryName ? "border-danger" : ''}`}>Category Name</label>
-                            <input
-                                type="text"
-                                className={`form-input ${error.categoryName ? "border-danger" : ''}`}
-                                name="categoryName"
-                                value={data.categoryName}
-                                onChange={handleChange}
-                                placeholder="Enter category name ex : Snacks"
-                                required
-                            />
-                            {error.categoryName && <p className="text-danger mt-2">{error.categoryName}</p>}
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={!data.categoryName}
-                            className={data.categoryName ? "login-btn" : "disable-btn"}
-                        >
-                            {id ? "Edit Category" : "Add Category"}
-                        </button>
-                    </form>
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label
+                className={` ${error.categoryName ? "border-danger" : ""}`}
+              >
+                Category Name
+              </label>
+              <input
+                type="text"
+                className={`form-input ${error.categoryName ? "border-danger" : ""}`}
+                name="categoryName"
+                value={data.categoryName}
+                onChange={handleChange}
+                placeholder="Enter category name ex : Snacks"
+                required
+              />
+              {error.categoryName && (
+                <p className="text-danger mt-2">{error.categoryName}</p>
+              )}
             </div>
-        </>
-    );
-}
 
-export default AddCategory
+            <button
+              type="submit"
+              disabled={!data.categoryName}
+              className={data.categoryName ? "login-btn" : "disable-btn"}
+            >
+              {id ? "Edit Category" : "Add Category"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AddCategory;

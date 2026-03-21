@@ -8,7 +8,7 @@ const DeletePopup = ({ setTogglePopup, name, handleDelete }) => {
         <div className='popup-overlay' onClick={() => setTogglePopup(false)}   >
             <div className='popup-box'>
                 <div className='popup-header'>
-                    <h4>Delete Modal</h4>
+                    <h4>Delete Popup</h4>
                     <IoMdClose size={28} className='close-icon' onClick={() => setTogglePopup(false)} />
                 </div>
                 <div className='popup-body'>

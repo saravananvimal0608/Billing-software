@@ -106,11 +106,16 @@ const AddProduct = () => {
     return (
         <>
             {loading && <Spinner fullScreen={true} />}
-            <div className="common-box my-5 container">
+             <div className="order-history-header mx-1 my-5 my-lg-3">
+          <h1 className="order-history-title">{id ? "Edit" : "Add"} Product</h1>
+          <p className= {`order-history-sub ${id ? "d-none" : "d-block"}`} >
+           Create a new product
+          </p>
+        </div>
+            <div className="common-box  container">
+                
                 <div className="login-card">
-                    <h2 className="login-title">{id ? "Edit" : "Add"} Product</h2>
-                    <p className={`login-subtitle ${id ? "d-none" : "d-block"}`} >Create a new product</p>
-
+                
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={` ${error.productName ? "border-danger" : ''}`}>Product Name</label>

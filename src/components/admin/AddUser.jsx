@@ -83,10 +83,15 @@ const AddUser = () => {
 
     return (
         <> {loading && <Spinner fullScreen={true} />}
+          <div className="order-history-header mx-1 my-5 my-lg-3">
+        <h1 className="order-history-title">{id ? "Update Account" : "Create Account"}</h1>
+        <p className="order-history-sub">
+         Please fill the details to {id ? "Update" : "register"}
+        </p>
+      </div>
             <div className="common-box container">
                 <div className="login-card">
-                    <h2 className="login-title">{id ? "Update Account" : "Create Account"}</h2>
-                    <p className="login-subtitle">Please fill the details to {id ? "Update" : "register"}</p>
+                    
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={` ${error.email ? "border-danger" : ''}`}>Enter Email</label>
