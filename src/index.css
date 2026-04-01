@@ -110,6 +110,12 @@
 .bg-primary-main {
   background: var(--main-gradient);
 }
+.bg-secondary-main{
+  background: var(--secondary-gradient);
+}
+.bg-heading-gradient{
+  background: var(--heading-gradient);
+}
 
 .color-primary-main {
   color: #fff !important;
@@ -140,10 +146,8 @@
 .premium-table {
   border-collapse: separate;
   border-spacing: 0;
-  overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
   display: block;
 }
 
@@ -166,7 +170,6 @@
 .premium-table tbody {
   display: block;
   max-height: 600px;
-  overflow-y: auto;
 }
 
 .premium-table tbody tr {
@@ -578,3 +581,26 @@
     transform: translateY(0);
   }
 }
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.premium-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.premium-table th,
+.premium-table td {
+  padding: 12px;
+  text-align: center;
+  white-space: nowrap; /* 🔥 prevent text wrapping */
+}
+
+
+
+

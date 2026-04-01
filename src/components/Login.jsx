@@ -6,7 +6,6 @@ import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import { commonApi } from "../common/common.js";
 import Spinner from "./Spinner.jsx";
-import mainImg from '../assets/cotechies-logo.jpeg'
 
 const Login = () => {
   const [data, setData] = useState({ email: "", password: "" });
@@ -27,6 +26,8 @@ const Login = () => {
         data,
       });
 
+      console.log("plan",res.data);
+      
       const token = res.data.token;
       localStorage.setItem("token", token);
       localStorage.setItem("role", res.data.role);

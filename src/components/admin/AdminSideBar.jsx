@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetDetails } from "../../slice/shopSlice";
 import Logout from "../../common/logout";
 import logo from "../../assets/cotechies-logo.jpeg";
@@ -16,8 +16,9 @@ import { FaHandsHelping } from "react-icons/fa";
 import { FaUnlockAlt } from "react-icons/fa";
 import { FaCartPlus } from "react-icons/fa";
 
-const AdminSideBar = ({ setToggle }) => {
-  const details = useSelector((state) => state?.fetchDetails?.data?.data?.data);
+const AdminSideBar = ({ setToggle,toggleColor,setColorToggle }) => {
+  const details = useSelector((state) => state?.fetchDetails?.shopDetails?.data?.data?.shopName);
+  
   const dispatch = useDispatch();
   const subscriptionPlan = localStorage.getItem("plan");
   const role = localStorage.getItem("role");
@@ -30,13 +31,13 @@ const AdminSideBar = ({ setToggle }) => {
     `color-primary-main side-bar-content d-flex align-items-center gap-2 text-decoration-none ${isActive ? "admin-navbar-active" : ""}`;
 
   return (
-    <div className="admin-side-bar-wrapper bg-primary-main d-flex flex-column">
+    <div className={`admin-side-bar-wrapper ${toggleColor ? "bg-secondary-main" : "bg-primary-main"} d-flex flex-column`}>
 
       {/* Logo */}
-      <div className="p-3">
+      <div className='p3 m-2' >
         <div className="text-center p-2 text-white shop-title d-flex align-items-center gap-2">
           <img src={logo} alt="logo" className="admin-logo" width={50} height={50} />
-          <h6 className="m-0 fw-bold">{details?.shopName}</h6>
+          <h6 className="m-0 fw-bold elipsis-main" onClick={() => setColorToggle(!toggleColor)} >{details}</h6>
         </div>
       </div>
 
@@ -71,7 +72,7 @@ const AdminSideBar = ({ setToggle }) => {
         </NavLink>
 
         <NavLink to="/admin/orderhistory" onClick={() => setToggle(false)} className={navClass}>
-          <BsCartCheck size={25}/> Order History
+          <BsCartCheck size={25}/> Order Histories
         </NavLink>
 
         <NavLink to="/admin/help-us" onClick={() => setToggle(false)} className={navClass}>
@@ -79,10 +80,10 @@ const AdminSideBar = ({ setToggle }) => {
         </NavLink>
 
         <NavLink to="/admin/view-report" onClick={() => setToggle(false)} className={navClass}>
-          <TbMessageReportFilled size={25}/> View Report
+          <TbMessageReportFilled size={25}/> View Reports
         </NavLink>
 
-        {role === "admin" && subscriptionPlan !== "Premium" && (
+        {role === "admin" && (
           <NavLink
             to="/admin/upgrade"
             onClick={() => setToggle(false)}
@@ -96,11 +97,7 @@ const AdminSideBar = ({ setToggle }) => {
         )}
       </nav>
 
-      {/* Logout */}
-      <div className="d-flex align-items-center gap-2 p-3 mt-auto color-primary-main">
         <Logout />
-      </div>
-
     </div>
   );
 };

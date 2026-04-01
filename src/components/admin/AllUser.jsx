@@ -12,7 +12,6 @@ const AllUser = () => {
   const [togglePopup, setTogglePopup] = useState(false);
   const [popupData, setPopupData] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -96,6 +95,8 @@ const AllUser = () => {
     handleFetch(currentPage, searchTerm);
   }, [currentPage, searchTerm]);
 
+
+  
   return (
     <>
       <div className="w-100">
@@ -208,12 +209,12 @@ const AllUser = () => {
                     </td>
 
                     <td>
-                      <MdDelete
+                     {user?.role !== "admin" &&  <MdDelete
                         size={20}
                         className="me-3 action-icon"
                         onClick={() => handlePopup(user)}
                       />
-
+                     }
                       <Link
                         to={`/admin/edituser/${user._id}`}
                         className="text-black"

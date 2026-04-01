@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import AdminSideBar from './AdminSideBar'
 import { Outlet } from 'react-router-dom'
 import { IoReorderThree } from "react-icons/io5";
+import SuperAdminSidebar from './SuperAdminSidebar';
 
 
-const AdminMain = ({toggleColor,setColorToggle}) => {
+const SuperAdminMain = () => {
     const [toggle, setToggle] = useState(false)
 
     return (
         <div className='d-flex position-relative vh-100 overflow-hidden'>
             <div className={`${toggle ? "mobile-view-active" : 'mobile-view'}`}>
-                <AdminSideBar setToggle={setToggle} toggleColor={toggleColor} setColorToggle={setColorToggle}/>
+                <SuperAdminSidebar setToggle={setToggle} />
             </div>
 
             <IoReorderThree
@@ -28,7 +28,7 @@ const AdminMain = ({toggleColor,setColorToggle}) => {
 
 
             <div className='flex-grow-1 overflow-auto'>
-                <Outlet  />
+                <Outlet />
             </div>
 
 
@@ -36,4 +36,4 @@ const AdminMain = ({toggleColor,setColorToggle}) => {
     )
 }
 
-export default AdminMain
+export default SuperAdminMain

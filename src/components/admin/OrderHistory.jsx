@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Skeleton from "react-loading-skeleton";
 import { downloadExcel, downloadPDF } from "../../utils/downloads.js";
+import { useNavigate } from "react-router-dom";
 
 const OrderHistory = () => {
   const [history, setHistory] = useState([]);
@@ -21,6 +22,36 @@ const OrderHistory = () => {
   const [downloadbtn, setDownloadbtn] = useState(false);
   const [paymentMode, setPaymentMode] = useState("");
   const [allPaymentMode, setAllPaymentMode] = useState([]);
+
+  const navigate = useNavigate();
+
+  //  get plan from localStorage
+  const plan = localStorage.getItem("plan");
+
+  //  calculate min date based on plan
+  const getMinDate = () => {
+    const today = new Date();
+
+    if (plan === "Basic") {
+      const d = new Date();
+      d.setDate(today.getDate() - 15);
+      return d;
+    }
+
+    if (plan === "Pro") {
+      const d = new Date();
+      d.setMonth(today.getMonth() - 3);
+      return d;
+    }
+
+    if (plan === "Premium") {
+      const d = new Date();
+      d.setMonth(today.getMonth() - 6);
+      return d;
+    }
+
+    return null;
+  };
 
   const handleFetch = async () => {
     try {
@@ -38,12 +69,13 @@ const OrderHistory = () => {
       if (startDate && endDate) {
         endpoint += `&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
       }
+
       if (paymentMode) {
         endpoint += `&paymentMode=${paymentMode}`;
       }
 
       const res = await commonApi({ method: "GET", endpoint });
-      console.log(res.data);
+
       setAllPaymentMode(res.data.paymentMode);
       setHistory(res.data.data || []);
       setTotalRevenue(res.data.totalRevenue || 0);
@@ -109,9 +141,16 @@ const OrderHistory = () => {
           <p className="order-history-sub">
             Track and manage all your past orders
           </p>
+
+          {/*  plan message */}
+          <p style={{ fontSize: "12px", color: "gray" }}>
+            {plan === "Basic" && "You can view only last 15 (D) data upgrade to pro "}
+            {plan === "Pro" && "You can view only last 3 (M) data upgrade to Premium "}
+            {plan === "Premium" && "You can view last 6 months data"}
+          </p>
         </div>
 
-        <div className="d-flex justify-content-between align-items-center flex-wrap  px-5 mb-3">
+        <div className="d-flex justify-content-between align-items-center flex-wrap px-5 mb-3">
           <DatePicker
             selectsRange
             startDate={startDate}
@@ -123,6 +162,8 @@ const OrderHistory = () => {
             isClearable
             placeholderText="Select date range"
             className="form-control input-search-box cursor-pointer"
+            minDate={getMinDate()}   //  restrict past
+            maxDate={new Date()}     //  restrict future
           />
 
           <div className="d-flex align-items-center flex-wrap gap-3 mt-3 mt-md-0">
@@ -143,6 +184,7 @@ const OrderHistory = () => {
                 ))}
               </select>
             </div>
+
             <div
               className="d-flex align-items-center flex-wrap gap-2 px-4 py-2 rounded"
               style={{
@@ -156,24 +198,33 @@ const OrderHistory = () => {
             </div>
 
             <div
-              className="position-relative "
+              className="position-relative"
               onClick={(e) => e.stopPropagation()}
             >
               <h6
                 className="download-btn pb-2 mb-0"
                 onClick={() => setDownloadbtn(!downloadbtn)}
               >
-                {" "}
                 Download History
               </h6>
 
               <div
-                className={`d-flex flex-column position-absolute ${downloadbtn ? "download-btn-option" : "d-none"}`}
+                className={`d-flex flex-column position-absolute ${
+                  downloadbtn ? "download-btn-option" : "d-none"
+                }`}
               >
-                <span onClick={() => downloadPDF({ startDate, endDate })}>
+                <span
+                  onClick={() =>
+                    downloadPDF({ startDate, endDate, navigate })
+                  }
+                >
                   Download PDF
                 </span>
-                <span onClick={() => downloadExcel({ startDate, endDate })}>
+                <span
+                  onClick={() =>
+                    downloadExcel({ startDate, endDate, navigate })
+                  }
+                >
                   Download EXCEL
                 </span>
               </div>
@@ -197,18 +248,10 @@ const OrderHistory = () => {
               {loading ? (
                 [...Array(5)].map((_, index) => (
                   <tr key={index}>
-                    <td>
-                      <Skeleton width={20} />
-                    </td>
-                    <td>
-                      <Skeleton width={100} />
-                    </td>
-                    <td>
-                      <Skeleton width={120} />
-                    </td>
-                    <td>
-                      <Skeleton width={60} />
-                    </td>
+                    <td><Skeleton width={20} /></td>
+                    <td><Skeleton width={100} /></td>
+                    <td><Skeleton width={120} /></td>
+                    <td><Skeleton width={60} /></td>
                   </tr>
                 ))
               ) : history.length === 0 ? (
@@ -221,9 +264,7 @@ const OrderHistory = () => {
                 history.map((item, index) => (
                   <tr key={item._id}>
                     <td>{(currentPage - 1) * 5 + index + 1}</td>
-
                     <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-
                     <td
                       className="cursor-pointer"
                       onClick={() => handlePopupData(item)}

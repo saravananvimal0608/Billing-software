@@ -114,7 +114,7 @@ const AllCategories = () => {
           </p>
         </div>
 
-        <div className="text-center d-flex flex-column align-items-center w-100 p-3">
+        <div className="text-center d-flex flex-column align-items-center  p-3 overflow-auto">
           <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
             <input
               className="w-50 input-search-box"

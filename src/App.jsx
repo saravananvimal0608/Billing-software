@@ -1,10 +1,8 @@
-import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { ToastContainer } from "react-toastify";
 import Login from "./components/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { AdminProtectedRoute } from "./utils/AdminProtected";
 import AdminMain from "./components/admin/AdminMain";
 import Dashboard from "./components/admin/AdminDashboard";
 import AddUser from "./components/admin/AddUser";
@@ -21,10 +19,19 @@ import ResetPassword from "./components/ResetPassword";
 import OrderHistory from "./components/admin/OrderHistory";
 import "react-loading-skeleton/dist/skeleton.css";
 import HelpUs from "./components/admin/HelpUs";
-import ViewReport from "./components/admin/ViewReport";
+import ViewReport from "./common/CommonViewReport";
 import Upgrade from "./components/admin/Upgrade";
+import SuperAdminMain from "./components/superAdmin/superAdminMain";
+import SuperAdminDashboard from "./components/superAdmin/Dashboard";
+import AllShops from "./components/superAdmin/AllShops";
+import "./css/SuperAdmin.css";
+import AddShops from "./components/superAdmin/AddShops";
+import ViewPlans from "./components/superAdmin/ViewPlans";
+import { useState } from "react";
 
 const App = () => {
+  const [toggleColor, setColorToggle] = useState(false);
+
   return (
     <div>
       <BrowserRouter>
@@ -38,10 +45,9 @@ const App = () => {
           <Route
             path="/admin"
             element={
-              <AdminProtectedRoute>
-                {" "}
-                <AdminMain />{" "}
-              </AdminProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminMain toggleColor={toggleColor} setColorToggle={setColorToggle}/>
+              </ProtectedRoute>
             }
           >
             <Route index element={<Dashboard />} />
@@ -60,11 +66,27 @@ const App = () => {
             <Route path="upgrade" element={<Upgrade />} />
           </Route>
 
+          {/* super admin routes */}
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <SuperAdminMain />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<SuperAdminDashboard />} />
+            <Route path="allshops" element={<AllShops />} />
+            <Route path="shops" element={<AddShops />} />
+            <Route path="view-report" element={<ViewReport />} />
+            <Route path="view-plan" element={<ViewPlans />} />
+          </Route>
+
           {/* user routes */}
           <Route
             path="/user"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["salesman"]}>
                 <Main />
               </ProtectedRoute>
             }

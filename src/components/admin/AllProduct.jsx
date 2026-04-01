@@ -118,7 +118,7 @@ const AllProduct = () => {
         <div className="text-center d-flex flex-column align-items-center w-100 p-3">
           <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap w-100">
             <input
-              className="w-50 input-search-box "
+              className="w-50 input-search-box p2"
               type="text"
               placeholder="Search products..."
               onChange={(e) => {
