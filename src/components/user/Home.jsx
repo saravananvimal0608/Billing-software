@@ -152,22 +152,33 @@ const Home = () => {
   return (
     <div>
       {popup && (
-        <div
-          className="position-fixed top-0 start-0 w-100 d-flex justify-content-center align-items-center  vh-100 "
-          style={{ background: "rgba(0, 0, 0, 0.6)", zIndex: 9999 }}
-        >
-          <div className="col-12 col-md-6">
-            <div className="success-popup d-flex flex-column align-items-center p-5">
-              <p className="m-0">Order placed successfully!</p>
-              <p>
-                {" "}
-                Total Price: ₹ <b>{successMesage}</b>
-              </p>
+        <div className="popup-overlay">
+          <div className="popup-box">
 
-              <span className="success-span " onClick={() => setPopup(false)}>
-                Close
-              </span>
+            <div className="popup-header">
+              <h4>Order Placed! 🎉</h4>
             </div>
+
+            <div className="popup-body" style={{ height: "auto" }}>
+              <div className="d-flex flex-column align-items-center gap-2 py-2">
+                <div className="icon-symbol d-flex justify-content-center align-items-center mb-2">
+                  <span style={{ fontSize: 22 }}>✔️</span>
+                </div>
+                <p className="m-0" style={{ color: "#5F4A8B", fontSize: 15 }}>Order placed successfully!</p>
+                <div
+                  className="d-flex align-items-center gap-2 px-4 py-2 rounded fw-bold"
+                  style={{ background: "var(--secondary-gradient)", color: "#fff", fontSize: 16 }}
+                >
+                  <span>Total :</span>
+                  <span>₹{successMesage}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="popup-footer">
+              <button className="login-btn" style={{ width: "auto", padding: "12px 32px" }} onClick={() => setPopup(false)}>Close</button>
+            </div>
+
           </div>
         </div>
       )}

@@ -2,14 +2,8 @@ import { useEffect, useState } from "react";
 import "../../css/Login.css";
 import Popup from "../DeletePopup.jsx";
 import { toast } from "react-toastify";
-import {
-  MdDelete,
-  MdEdit,
-  MdMoreVert,
-  MdAdd,
-  MdVisibility,
-  MdSettings,
-} from "react-icons/md";
+import { MdDelete, MdEdit, MdMoreVert, MdAdd, MdVisibility, MdSettings } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
 import { commonApi } from "../../common/common.js";
 import Skeleton from "react-loading-skeleton";
 
@@ -28,17 +22,16 @@ const AllProduct = () => {
   const [PlanBanner, setPlanBanner] = useState("");
   const [shopId, setShopId] = useState("");
   const [posterPopup, setPosterPopup] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState([]);
   const [viewPosterPopup, setViewPosterPopup] = useState(false);
   const [bannersList, setBannersList] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(false);
   const [selectedBannerImage, setSelectedBannerImage] = useState(null);
   const [imagePreviewPopup, setImagePreviewPopup] = useState(false);
-  const [menuOpenFor, setMenuOpenFor] = useState(null);
-  const [iconMenuOpen, setIconMenuOpen] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState("");
 
+  // Fetch shops
   const handleFetch = async (page = 1, search = "") => {
     try {
       setLoading(true);
@@ -58,7 +51,7 @@ const AllProduct = () => {
 
   const handleSelect = (id) => {
     setSelectedProducts((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
@@ -77,7 +70,6 @@ const AllProduct = () => {
       });
 
       toast.success(res.data.message);
-
       setSelectedProducts([]);
       setTogglePopup(false);
       setCurrentPage(1);
@@ -129,20 +121,24 @@ const AllProduct = () => {
       handleFetch();
     } catch (error) {
       console.log(error);
-      
       toast.error(error?.response?.data?.message || "Upgrade failed");
     }
   };
 
+  // Multiple Banner Upload
   const handleBannerUpload = async () => {
     try {
-      if (!image || !PlanBanner) {
-        toast.error("Select image & plan");
+      if (!image || image.length === 0 || !PlanBanner) {
+        toast.error("Select images & plan");
         return;
       }
 
       const formData = new FormData();
-      formData.append("banner", image);
+
+      image.forEach((imgFile) => {
+        formData.append("banner", imgFile); // must match backend field
+      });
+
       formData.append("bannerType", PlanBanner);
 
       const res = await commonApi({
@@ -156,8 +152,9 @@ const AllProduct = () => {
 
       toast.success(res.data.message);
       setPosterPopup(false);
-      setImage(null);
+      setImage([]);
       setPlanBanner("");
+
       if (viewPosterPopup) {
         handleFetchBanners();
       }
@@ -166,6 +163,7 @@ const AllProduct = () => {
     }
   };
 
+  // Fetch all banners
   const handleFetchBanners = async () => {
     try {
       setLoadingBanners(true);
@@ -197,14 +195,10 @@ const AllProduct = () => {
   const openViewPosters = () => {
     setViewPosterPopup(true);
     handleFetchBanners();
-    setMenuOpenFor(null);
-    setIconMenuOpen(false);
   };
 
   const openAddPoster = () => {
     setPosterPopup(true);
-    setMenuOpenFor(null);
-    setIconMenuOpen(false);
   };
 
   const handleViewImage = (imageUrl) => {
@@ -224,15 +218,13 @@ const AllProduct = () => {
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
-      setMenuOpenFor(null);
-      setIconMenuOpen(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  console.log("shopsData", shopsData);
-
+  console.log('shopsData',shopsData);
+  
   return (
     <div className="container-fluid px-4">
       {/* delete popup */}
@@ -244,210 +236,149 @@ const AllProduct = () => {
         />
       )}
 
-      {/* image upload popup */}
+      {/* poster upload popup */}
       {posterPopup && (
-        <div className="otp-box">
-          <div className="otp-card upgrade-popup">
-            <h4>Upload Banner</h4>
-            <p>Select plan and upload banner image</p>
+        <div className="popup-overlay">
+          <div className="popup-box" style={{ maxWidth: 480, width: "90%" }}>
 
-            <div className="input-group-custom">
-              <label>Banner Type</label>
-              <select
-                className="select-box"
-                onChange={(e) => setPlanBanner(e.target.value)}
-                value={PlanBanner}
-              >
-                <option value="">Select Plan</option>
-                <option value="All">All</option>
-                <option value="Basic">Basic</option>
-                <option value="Pro">Pro</option>
-                <option value="Premium">Premium</option>
-              </select>
+            <div className="popup-header">
+              <h4>Upload Banner</h4>
+              <IoClose className="close-icon" size={28} onClick={() => { setPosterPopup(false); setImage([]); setPlanBanner(""); }} />
             </div>
 
-            <div className="input-group-custom">
-              <label>Upload Image</label>
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/jpg"
-                className="file-upload-box"
-                onChange={(e) => setImage(e.target.files[0])}
-              />
-            </div>
+            <div className="popup-body" style={{ height: "auto" }}>
 
-            {image && (
-              <div className="preview-container">
-                <img
-                  src={URL.createObjectURL(image)}
-                  alt="preview"
-                  className="preview-image"
-                />
+              <div className="form-group">
+                <label>Banner Type</label>
+                <select className="form-input" style={{ cursor: "pointer" }} value={PlanBanner} onChange={(e) => setPlanBanner(e.target.value)}>
+                  <option value="">Select Plan</option>
+                  <option value="All">All</option>
+                  <option value="Basic">Basic</option>
+                  <option value="Pro">Pro</option>
+                  <option value="Premium">Premium</option>
+                </select>
               </div>
-            )}
 
-            <div className="popup-actions">
-              <button
-                className="btn cancel-btn"
-                onClick={() => {
-                  setPosterPopup(false);
-                  setImage(null);
-                  setPlanBanner("");
-                }}
-              >
-                Cancel
-              </button>
-              <button className="btn confirm-btn" onClick={handleBannerUpload}>
-                Upload
-              </button>
+              <div className="form-group">
+                <label>Upload Images</label>
+                <input type="file" accept="image/png,image/jpeg,image/jpg" className="form-input" style={{ padding: "10px" }} multiple onChange={(e) => setImage([...e.target.files])} />
+              </div>
+
+              {image.length > 0 && (
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {image.map((imgFile, index) => (
+                    <img key={index} src={URL.createObjectURL(imgFile)} alt={`preview-${index}`}
+                      style={{ width: 70, height: 60, objectFit: "cover", borderRadius: 8, border: "2px solid #e0e0e0" }}
+                    />
+                  ))}
+                </div>
+              )}
+
             </div>
+
+            <div className="popup-footer">
+              <button className="btn-cancel" onClick={() => { setPosterPopup(false); setImage([]); setPlanBanner(""); }}>Cancel</button>
+              <button className="login-btn" style={{ width: "auto", padding: "12px 28px" }} onClick={handleBannerUpload}>Upload</button>
+            </div>
+
           </div>
         </div>
       )}
 
       {/* view banners popup */}
       {viewPosterPopup && (
-        <div className="otp-box">
-          <div className="otp-card" style={{ maxWidth: "600px", width: "90%" }}>
-            <h4>All Banners</h4>
-            <p>View and manage all uploaded banners</p>
+        <div className="popup-overlay">
+          <div className="popup-box" style={{ maxWidth: 560, width: "90%" }}>
 
-            <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+            <div className="popup-header">
+              <h4>All Banners</h4>
+              <IoClose className="close-icon" size={28} onClick={() => { setViewPosterPopup(false); setBannersList([]); }} />
+            </div>
+
+            <div className="popup-body" style={{ height: 340 }}>
               {loadingBanners ? (
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                  Loading...
+                <div className="d-flex flex-column gap-2">
+                  {[...Array(4)].map((_, i) => <Skeleton key={i} height={70} borderRadius={10} />)}
                 </div>
               ) : bannersList.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                  No banners found
-                </div>
+                <p className="text-center login-title mt-3">No banners found</p>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "15px",
-                  }}
-                >
+                <div className="d-flex flex-column gap-3">
                   {bannersList.map((banner) => (
-                    <div
-                      key={banner._id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "15px",
-                        padding: "10px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "10px",
-                        background: "#f9f9f9",
-                      }}
-                    >
+                    <div key={banner._id} className="d-flex align-items-center gap-3 p-2 rounded" style={{ border: "1px solid #e0e0e0", background: "#f8f9fa" }}>
                       <img
                         src={banner.bannerImage}
                         alt={banner.bannerType}
-                        style={{
-                          width: "100px",
-                          height: "80px",
-                          objectFit: "cover",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                        }}
+                        style={{ width: 90, height: 65, objectFit: "cover", borderRadius: 8, cursor: "pointer", flexShrink: 0 }}
                         onClick={() => handleViewImage(banner.bannerImage)}
                       />
-                      <div style={{ flex: 1, textAlign: "left" }}>
-                        <strong>{banner.bannerType}</strong>
-                        <div style={{ fontSize: "12px", color: "#666" }}>
-                          ID: {banner._id}
-                        </div>
+                      <div className="flex-grow-1 text-start">
+                        <span className="status-badge status-resolved fw-bold">{banner.bannerType}</span>
+                        <p className="m-0 mt-1" style={{ fontSize: 11, color: "#999" }}>ID: {banner._id}</p>
                       </div>
-                      <MdDelete
-                        size={22}
-                        color="#dc3545"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleDeleteBanner(banner._id)}
-                      />
+                      <MdDelete size={22} className="action-icon" style={{ color: "#d32f2f", flexShrink: 0 }} onClick={() => handleDeleteBanner(banner._id)} />
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="popup-actions" style={{ marginTop: "20px" }}>
-              <button
-                className="btn cancel-btn"
-                onClick={() => {
-                  setViewPosterPopup(false);
-                  setBannersList([]);
-                }}
-              >
-                Close
-              </button>
+            <div className="popup-footer">
+              <button className="btn-cancel" onClick={() => { setViewPosterPopup(false); setBannersList([]); }}>Close</button>
             </div>
+
           </div>
         </div>
       )}
 
       {/* image preview popup */}
       {imagePreviewPopup && (
-        <div
-          className="img-popup-overlay"
-          onClick={() => setImagePreviewPopup(false)}
-        >
-          <div className="img-popup-card" onClick={(e) => e.stopPropagation()}>
-            <div
-              className="img-popup-close"
-              onClick={() => setImagePreviewPopup(false)}
-            >
-              ✕
+        <div className="popup-overlay" onClick={() => setImagePreviewPopup(false)}>
+          <div className="popup-box" style={{ maxWidth: 500, width: "90%", padding: 0, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
+            <div className="popup-header">
+              <h4>Banner Preview</h4>
+              <IoClose className="close-icon" size={28} onClick={() => setImagePreviewPopup(false)} />
             </div>
-            <img
-              src={selectedBannerImage}
-              alt="Preview"
-              className="img-popup-image"
-            />
+            <img src={selectedBannerImage} alt="Preview" style={{ width: "100%", maxHeight: 340, objectFit: "contain", background: "#f8f9fa" }} />
           </div>
         </div>
       )}
 
       {/* upgradeStatus popup */}
       {upgradePopup && (
-        <div className="otp-box">
-          <div className="otp-card upgrade-card">
-            <h4>Confirm Upgrade</h4>
-            <div className="select-option-container">
-              <label>Select Plan :</label>
-              <select
-                onChange={(e) => setPlan(e.target.value)}
-                className="select-option"
-              >
-                <option value="">Choose plan</option>
-                <option value={"Basic"}>Basic</option>
-                <option value={"Pro"}>Pro</option>
-                <option value={"Premium"}>Premium</option>
-              </select>
+        <div className="popup-overlay">
+          <div className="popup-box">
+
+            <div className="popup-header">
+              <h4>Confirm Upgrade</h4>
+              <IoClose className="close-icon" size={28} onClick={() => setUpgradePopup(false)} />
             </div>
-            <div className="select-option-container">
-              <label>Payment Status :</label>
-              <select
-                onChange={(e) => setPaymentStatus(e.target.value)}
-                className="select-option"
-              >
-                <option value="">Select status</option>
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-              </select>
+
+            <div className="popup-body" style={{ height: "auto" }}>
+              <div className="form-group">
+                <label>Select Plan</label>
+                <select className="form-input" style={{ cursor: "pointer" }} onChange={(e) => setPlan(e.target.value)}>
+                  <option value="">Choose plan</option>
+                  <option value="Basic">Basic</option>
+                  <option value="Pro">Pro</option>
+                  <option value="Premium">Premium</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Payment Status</label>
+                <select className="form-input" style={{ cursor: "pointer" }} onChange={(e) => setPaymentStatus(e.target.value)}>
+                  <option value="">Select status</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
             </div>
-            <div className="popup-actions">
-              <button
-                className="btn cancel-btn"
-                onClick={() => setUpgradePopup(false)}
-              >
-                No
-              </button>
-              <button className="btn confirm-btn"  onClick={() => handleUpgrade()}>
-                Yes, Upgrade
-              </button>
+
+            <div className="popup-footer">
+              <button className="btn-cancel" onClick={() => setUpgradePopup(false)}>Cancel</button>
+              <button className="login-btn" style={{ width: "auto", padding: "12px 28px" }} onClick={() => handleUpgrade()}>Yes, Upgrade</button>
             </div>
+
           </div>
         </div>
       )}

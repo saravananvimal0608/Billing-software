@@ -144,8 +144,10 @@ const OrderHistory = () => {
 
           {/*  plan message */}
           <p style={{ fontSize: "12px", color: "gray" }}>
-            {plan === "Basic" && "You can view only last 15 (D) data upgrade to pro "}
-            {plan === "Pro" && "You can view only last 3 (M) data upgrade to Premium "}
+            {plan === "Basic" &&
+              "You can view only last 15 (D) data upgrade to pro "}
+            {plan === "Pro" &&
+              "You can view only last 3 (M) data upgrade to Premium "}
             {plan === "Premium" && "You can view last 6 months data"}
           </p>
         </div>
@@ -162,8 +164,8 @@ const OrderHistory = () => {
             isClearable
             placeholderText="Select date range"
             className="form-control input-search-box cursor-pointer"
-            minDate={getMinDate()}   //  restrict past
-            maxDate={new Date()}     //  restrict future
+            minDate={getMinDate()} //  restrict past
+            maxDate={new Date()} //  restrict future
           />
 
           <div className="d-flex align-items-center flex-wrap gap-3 mt-3 mt-md-0">
@@ -214,9 +216,7 @@ const OrderHistory = () => {
                 }`}
               >
                 <span
-                  onClick={() =>
-                    downloadPDF({ startDate, endDate, navigate })
-                  }
+                  onClick={() => downloadPDF({ startDate, endDate, navigate })}
                 >
                   Download PDF
                 </span>
@@ -232,68 +232,72 @@ const OrderHistory = () => {
           </div>
         </div>
 
-       <div className="table-responsive w-100">
-  <table className="table table-striped table-hover align-middle text-center">
+        <div className="table-responsive mx-3">
+          <table className="table table-striped table-hover align-middle text-center">
+            <thead className="table-header">
+              <tr>
+                <th>No</th>
+                <th>Order Date</th>
+                <th>Products</th>
+                <th>Payment Mode</th>
+                <th>Total Price</th>
+              </tr>
+            </thead>
 
-    <thead className="table-header">
-      <tr>
-        <th>No</th>
-        <th>Order Date</th>
-        <th>Products</th>
-        <th>Payment Mode</th>
-        <th>Total Price</th>
-      </tr>
-    </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, index) => (
+                  <tr key={index}>
+                    <td>
+                      <Skeleton width={20} />
+                    </td>
+                    <td>
+                      <Skeleton width={100} />
+                    </td>
+                    <td>
+                      <Skeleton width={120} />
+                    </td>
+                    <td>
+                      <Skeleton width={80} />
+                    </td>
+                    <td>
+                      <Skeleton width={60} />
+                    </td>
+                  </tr>
+                ))
+              ) : history.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center login-title">
+                    No data found
+                  </td>
+                </tr>
+              ) : (
+                history.map((item, index) => (
+                  <tr key={item._id}>
+                    <td>{(currentPage - 1) * 5 + index + 1}</td>
 
-    <tbody>
-      {loading ? (
-        [...Array(5)].map((_, index) => (
-          <tr key={index}>
-            <td><Skeleton width={20} /></td>
-            <td><Skeleton width={100} /></td>
-            <td><Skeleton width={120} /></td>
-            <td><Skeleton width={80} /></td>
-            <td><Skeleton width={60} /></td>
-          </tr>
-        ))
-      ) : history.length === 0 ? (
-        <tr>
-          <td colSpan={5} className="text-center login-title">
-            No data found
-          </td>
-        </tr>
-      ) : (
-        history.map((item, index) => (
-          <tr key={item._id}>
-            <td>{(currentPage - 1) * 5 + index + 1}</td>
+                    <td>{new Date(item.createdAt).toLocaleDateString()}</td>
 
-            <td>
-              {new Date(item.createdAt).toLocaleDateString()}
-            </td>
+                    <td
+                      className="text-primary fw-bold cursor-pointer"
+                      onClick={() => handlePopupData(item)}
+                    >
+                      View Order Details
+                    </td>
 
-            <td
-              className="text-primary fw-bold cursor-pointer"
-              onClick={() => handlePopupData(item)}
-            >
-              View Order Details
-            </td>
+                    <td>
+                      <span className="badge bg-secondary">
+                        {item.paymentMode}
+                      </span>
+                    </td>
 
-            <td>
-              <span className="badge bg-secondary">
-                {item.paymentMode}
-              </span>
-            </td>
-
-            <td className="fw-bold text-success">
-              ₹{item.totalPrice}
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-
-  </table>
-</div>
+                    <td className="fw-bold text-success">₹{item.totalPrice}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );
