@@ -28,6 +28,7 @@ import "./css/SuperAdmin.css";
 import AddShops from "./components/superAdmin/AddShops";
 import ViewPlans from "./components/superAdmin/ViewPlans";
 import { useState } from "react";
+import OtpBox from "./common/OtpBox";
 
 const App = () => {
   const [toggleColor, setColorToggle] = useState(false);
@@ -40,13 +41,16 @@ const App = () => {
           <Route path="/" element={<Login />} />
           <Route path="/forgotPassword" element={<ForgetPassword />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
-
+          <Route path="/verify-otp/:email" element={<OtpBox />} />
           {/* admin routes */}
           <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminMain toggleColor={toggleColor} setColorToggle={setColorToggle}/>
+                <AdminMain
+                  toggleColor={toggleColor}
+                  setColorToggle={setColorToggle}
+                />
               </ProtectedRoute>
             }
           >

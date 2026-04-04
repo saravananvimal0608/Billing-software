@@ -25,8 +25,6 @@ const Login = () => {
         endpoint: "api/users/login",
         data,
       });
-
-      console.log("plan",res.data);
       
       const token = res.data.token;
       localStorage.setItem("token", token);

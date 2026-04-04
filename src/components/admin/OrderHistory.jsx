@@ -232,77 +232,68 @@ const OrderHistory = () => {
           </div>
         </div>
 
-        <div className="text-center d-flex flex-column align-items-center w-100 p-3">
-          <table className="premium-table w-100 all-product-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Order Date</th>
-                <th>Products</th>
-                <th>Payment Mode</th>
-                <th>Total Price</th>
-              </tr>
-            </thead>
+       <div className="table-responsive w-100">
+  <table className="table table-striped table-hover align-middle text-center">
 
-            <tbody>
-              {loading ? (
-                [...Array(5)].map((_, index) => (
-                  <tr key={index}>
-                    <td><Skeleton width={20} /></td>
-                    <td><Skeleton width={100} /></td>
-                    <td><Skeleton width={120} /></td>
-                    <td><Skeleton width={60} /></td>
-                  </tr>
-                ))
-              ) : history.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center login-title">
-                    No data found
-                  </td>
-                </tr>
-              ) : (
-                history.map((item, index) => (
-                  <tr key={item._id}>
-                    <td>{(currentPage - 1) * 5 + index + 1}</td>
-                    <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-                    <td
-                      className="cursor-pointer"
-                      onClick={() => handlePopupData(item)}
-                    >
-                      View Order Details
-                    </td>
-                    <td>{item.paymentMode}</td>
-                    <td>₹{item.totalPrice}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+    <thead className="table-header">
+      <tr>
+        <th>No</th>
+        <th>Order Date</th>
+        <th>Products</th>
+        <th>Payment Mode</th>
+        <th>Total Price</th>
+      </tr>
+    </thead>
 
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-center align-items-center mt-4">
-              <button
-                className="pagination-btn me-3"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Prev
-              </button>
+    <tbody>
+      {loading ? (
+        [...Array(5)].map((_, index) => (
+          <tr key={index}>
+            <td><Skeleton width={20} /></td>
+            <td><Skeleton width={100} /></td>
+            <td><Skeleton width={120} /></td>
+            <td><Skeleton width={80} /></td>
+            <td><Skeleton width={60} /></td>
+          </tr>
+        ))
+      ) : history.length === 0 ? (
+        <tr>
+          <td colSpan={5} className="text-center login-title">
+            No data found
+          </td>
+        </tr>
+      ) : (
+        history.map((item, index) => (
+          <tr key={item._id}>
+            <td>{(currentPage - 1) * 5 + index + 1}</td>
 
-              <span className="color-primary fw-bold">
-                Page {currentPage} of {totalPages}
+            <td>
+              {new Date(item.createdAt).toLocaleDateString()}
+            </td>
+
+            <td
+              className="text-primary fw-bold cursor-pointer"
+              onClick={() => handlePopupData(item)}
+            >
+              View Order Details
+            </td>
+
+            <td>
+              <span className="badge bg-secondary">
+                {item.paymentMode}
               </span>
+            </td>
 
-              <button
-                className="pagination-btn ms-3"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
+            <td className="fw-bold text-success">
+              ₹{item.totalPrice}
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+
+  </table>
+</div>
       </div>
     </>
   );

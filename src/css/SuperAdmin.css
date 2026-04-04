@@ -241,3 +241,19 @@
   background: #5f4a8b; /* theme color */
   transform: scale(1.1) rotate(90deg);
 }
+
+.select-option{
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+}
+.select-option-container{
+  display: flex;
+align-items: start;
+padding-bottom: 10px;
+flex-direction: column;
+}
+
+.select-option-container label{
+  color:#483674;
+}

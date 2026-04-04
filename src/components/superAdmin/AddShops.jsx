@@ -4,11 +4,10 @@ import "../../css/Login.css";
 import { commonApi } from "../../common/common.js";
 import Spinner from "../Spinner.jsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 const AddShops = () => {
-  const [otp, setOtp] = useState("");
-  const [otpToggle, setOtpToggle] = useState(false);
+  const navigate = useNavigate();
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [data, setData] = useState({
     shopName: "",
@@ -52,7 +51,8 @@ const AddShops = () => {
     const mobileRegex = /^[6-9]\d{9}$/;
 
     if (!data.shopName.trim()) errorMessages.shopName = "Shop name is required";
-    if (!data.ownerName.trim()) errorMessages.ownerName = "Owner name is required";
+    if (!data.ownerName.trim())
+      errorMessages.ownerName = "Owner name is required";
 
     if (!data.mobileNumber.trim())
       errorMessages.mobileNumber = "Mobile number is required";
@@ -108,11 +108,6 @@ const AddShops = () => {
             data,
           });
 
-      // ✅ IMPORTANT: always set email
-      setRegisteredEmail(data.email);
-
-      setOtp("");
-      setOtpToggle(true); // popup open for BOTH cases
 
       // ✅ clear only for register
       if (!id) {
@@ -120,30 +115,11 @@ const AddShops = () => {
       }
 
       toast.success(res.data.message);
+      navigate(`/verify-otp/${encodeURIComponent(data.email)}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleOtp = async () => {
-    try {
-      const res = await commonApi({
-        method: "POST",
-        endpoint: "api/users/verifyotp",
-        data: {
-          otp,
-          email: registeredEmail, // 🔥 important
-        },
-      });
-
-      toast.success(res.data.message);
-
-      setOtp("");
-      setOtpToggle(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -154,40 +130,6 @@ const AddShops = () => {
   return (
     <div className="position-relative">
       {loading && <Spinner fullScreen={true} />}
-
-      {/* OTP POPUP */}
-      {otpToggle && (
-        <div className="otp-box">
-          <div className="otp-card">
-            <h4>Verify OTP</h4>
-            <p>
-              A 6-digit OTP has been sent to{" "}
-              <strong>{registeredEmail}</strong>
-            </p>
-
-            <input
-              type="text"
-              className="otp-input"
-              value={otp}
-              onChange={(e) => {
-                if (/^\d{0,6}$/.test(e.target.value)) {
-                  setOtp(e.target.value);
-                }
-              }}
-              placeholder="------"
-              maxLength={6}
-            />
-
-            <button
-              className={otp.length === 6 ? "login-btn" : "disable-btn"}
-              disabled={otp.length !== 6}
-              onClick={handleOtp}
-            >
-              Verify OTP
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="order-history-header mx-1 my-5 my-lg-3">
         <h1 className="order-history-title">
@@ -290,9 +232,7 @@ const AddShops = () => {
                 onChange={handleChange}
                 placeholder="Enter email"
               />
-              {error.email && (
-                <p className="text-danger mt-2">{error.email}</p>
-              )}
+              {error.email && <p className="text-danger mt-2">{error.email}</p>}
             </div>
 
             {!id && (

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const Upgrade = () => {
   const [plans, setPlans] = useState([]);
+  const [confirmPlan, setConfirmPlan] = useState(null);
   const subcriptionPlan = localStorage.getItem("plan");
 
   const handleUpgrade = async (upgradePlanName) => {
@@ -59,15 +60,36 @@ const Upgrade = () => {
                 </li>
               ))}
             </ul>
-            <button
-              className={`upgrade-btn ${
-                subcriptionPlan === p.planName ? "upgrade-btn-disabled" : ""
-              }`}
-              disabled={subcriptionPlan === p.planName}
-              onClick={() => handleUpgrade(p.planName)}
-            >
-              {subcriptionPlan === p.planName ? "Current Plan" : p.planBtn}
-            </button>
+       <button
+  className={`upgrade-btn ${
+    subcriptionPlan === p.planName ? "upgrade-btn-disabled" : ""
+  }`}
+  disabled={subcriptionPlan === p.planName}
+  onClick={() => setConfirmPlan(p.planName)}
+>
+  {subcriptionPlan === p.planName ? "Current Plan" : p.planBtn}
+</button>
+
+{confirmPlan === p.planName && (
+  <div className="confirm-box d-flex align-items-center gap-2">
+    <button
+      className="btn btn-success btn-sm"
+      onClick={() => {
+        handleUpgrade(p.planName);
+        setConfirmPlan(null);
+      }}
+    >
+      Yes
+    </button>
+
+    <button
+      className="btn btn-secondary btn-sm"
+      onClick={() => setConfirmPlan(null)}
+    >
+      No
+    </button>
+  </div>
+)}
           </div>
         ))}
       </div>

@@ -160,85 +160,104 @@ const AllProduct = () => {
             </div>
           )}
 
-          <table className="premium-table w-100 all-product-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Products</th>
-                <th>Price</th>
-                <th>Category</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                [...Array(4)].map((_, index) => (
-                  <tr key={index}>
-                    <td>
-                      <Skeleton width={20} />
-                    </td>
-                    <td>
-                      <Skeleton width={120} />
-                    </td>
-                    <td>
-                      <Skeleton width={20} inline />
-                      {""}
-                      <Skeleton width={20} inline />
-                    </td>
-                  </tr>
-                ))
-              ) : products.length === 0 ? (
+          <div className="table-responsive w-100">
+            <table className="table table-striped table-hover align-middle text-center">
+              <thead className="table-header">
                 <tr>
-                  <td colSpan={5} className="text-center login-title">
-                    No data found
-                  </td>
+                  <th>No</th>
+                  <th>Products</th>
+                  <th>Price</th>
+                  <th>Category</th>
+                  <th>Action</th>
                 </tr>
-              ) : (
-                products.map((item, index) => (
-                  <tr key={item._id}>
-                    <td>
-                      <input
-                        className="me-3"
-                        type="checkbox"
-                        checked={selectedProducts.includes(item._id)}
-                        onChange={() => handleSelect(item._id)}
-                      />
-                      {(currentPage - 1) * 5 + index + 1}
-                    </td>
-                    <td className="d-flex justify-content-center">
-                      <p className="elipsis-common m-0">
-                        {item.productName ? item.productName : "----"}
-                      </p>
-                    </td>
-                    <td>{item.productPrice ? item.productPrice : "----"}</td>
-                    <td className="d-flex justify-content-center">
-                      {" "}
-                      <p className="elipsis-common m-0">
-                        {item.category?.categoryName
-                          ? item.category?.categoryName
-                          : "----"}
-                      </p>
-                    </td>
-                    <td>
-                      <MdDelete
-                        size={20}
-                        className="me-md-3 action-icon"
-                        onClick={() => handlePopup(item)}
-                      />
-                      <Link
-                        to={`/admin/editproduct/${item._id}`}
-                        className="text-black"
-                      >
-                        <MdEdit size={20} className="edit-icon" />
-                      </Link>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  [...Array(4)].map((_, index) => (
+                    <tr key={index}>
+                      <td>
+                        <Skeleton width={20} />
+                      </td>
+                      <td>
+                        <Skeleton width={120} />
+                      </td>
+                      <td>
+                        <Skeleton width={60} />
+                      </td>
+                      <td>
+                        <Skeleton width={100} />
+                      </td>
+                      <td>
+                        <Skeleton width={40} />
+                      </td>
+                    </tr>
+                  ))
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center login-title">
+                      No data found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  products.map((item, index) => (
+                    <tr key={item._id}>
+                      <td>
+                        <input
+                          className="me-3"
+                          type="checkbox"
+                          checked={selectedProducts.includes(item._id)}
+                          onChange={() => handleSelect(item._id)}
+                        />
+                        {(currentPage - 1) * 5 + index + 1}
+                      </td>
 
+                      <td>
+                        <p
+                          title={item.productName}
+                          className="m-0 text-truncate-custom"
+                        >
+                          {item.productName?.length > 15
+                            ? `${item.productName.slice(0, 15)}...`
+                            : item.productName || "----"}
+                        </p>
+                      </td>
+
+                      <td className="fw-bold text-success">
+                        ₹{item.productPrice || "----"}
+                      </td>
+
+                      <td>
+                        <p
+                          title={item.category?.categoryName}
+                          className="m-0 text-truncate-custom"
+                        >
+                          {item.category?.categoryName?.length > 15
+                            ? `${item.category.categoryName.slice(0, 15)}...`
+                            : item.category?.categoryName || "----"}
+                        </p>
+                      </td>
+
+                      <td>
+                        <MdDelete
+                          size={20}
+                          className="me-md-3 action-icon"
+                          onClick={() => handlePopup(item)}
+                        />
+
+                        <Link
+                          to={`/admin/editproduct/${item._id}`}
+                          className="text-dark"
+                        >
+                          <MdEdit size={20} className="edit-icon" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
           {products.length > 0 && totalPages > 1 && (
             <div className="d-flex justify-content-center align-items-center mt-4">
               <button

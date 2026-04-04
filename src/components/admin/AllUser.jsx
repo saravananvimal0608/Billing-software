@@ -6,6 +6,7 @@ import Popup from "../DeletePopup.jsx";
 import { commonApi } from "../../common/common.js";
 import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
+import { useNavigate } from "react-router-dom";
 
 const AllUser = () => {
   const [users, setUsers] = useState([]);
@@ -15,7 +16,7 @@ const AllUser = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
-
+const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -91,11 +92,18 @@ const AllUser = () => {
     }
   };
 
+  const handleInactiveClick = () => {
+  toast.warning("This user is inactive. Please upgrade your plan to access this user.");
+  navigate("/admin/upgrade");
+};
+
   useEffect(() => {
     handleFetch(currentPage, searchTerm);
   }, [currentPage, searchTerm]);
 
 
+  console.log(users,'users');
+  
   
   return (
     <>
@@ -159,74 +167,92 @@ const AllUser = () => {
             </div>
           )}
 
-          <table className="premium-table w-100">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Email</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+        <div className="table-responsive w-100">
+  <table className="table table-striped table-hover align-middle text-center">
+    
+    <thead className="table-header">
+      <tr>
+        <th>No</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-            <tbody>
-              {loading ? (
-                [...Array(4)].map((_, index) => (
-                  <tr key={index}>
-                    <td>
-                      <Skeleton width={20} />
-                    </td>
-                    <td>
-                      <Skeleton width={150} />
-                    </td>
-                    <td>
-                      <Skeleton width={40} />
-                    </td>
-                  </tr>
-                ))
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center login-title">
-                    No data found
-                  </td>
-                </tr>
-              ) : (
-                users.map((user, index) => (
-                  <tr key={user._id}>
-                    <td>
-                      <input
-                        className="me-3"
-                        type="checkbox"
-                        checked={selectedUsers.includes(user._id)}
-                        onChange={() => handleSelect(user._id)}
-                      />
-                      {(currentPage - 1) * 5 + index + 1}
-                    </td>
+    <tbody>
+      {loading ? (
+        [...Array(4)].map((_, index) => (
+          <tr key={index}>
+            <td><Skeleton width={20} /></td>
+            <td><Skeleton width={150} /></td>
+            <td><Skeleton width={40} /></td>
+          </tr>
+        ))
+      ) : users.length === 0 ? (
+        <tr>
+          <td colSpan={3} className="text-center login-title">
+            No data found
+          </td>
+        </tr>
+      ) : (
+        users.map((user, index) => (
+        <tr
+  key={user._id}
+  className={!user.isActive ? "opacity-50" : ""}
+  style={{ cursor: !user.isActive ? "pointer" : "default" }}
+  onClick={() => {
+    if (!user.isActive) handleInactiveClick();
+  }}
+>
+            <td>
+              <input
+                className="me-3"
+                type="checkbox"
+                checked={selectedUsers.includes(user._id)}
+                onChange={() => handleSelect(user._id)}
+              />
+              {(currentPage - 1) * 5 + index + 1}
+            </td>
 
-                    <td className="d-flex justify-content-center">
-                      <p className="elipsis-common m-0" title={user.email}>
-                        {user.email}
-                      </p>
-                    </td>
+<td
+  className={`elipsis-common m-0 ${
+    !user.isActive ? "text-muted cursor-pointer" : ""
+  }`}
+  title={user.email}
+  onClick={() => {
+    if (!user.isActive) handleInactiveClick();
+  }}
+>
+  {user.email}
 
-                    <td>
-                     {user?.role !== "admin" &&  <MdDelete
-                        size={20}
-                        className="me-3 action-icon"
-                        onClick={() => handlePopup(user)}
-                      />
-                     }
-                      <Link
-                        to={`/admin/edituser/${user._id}`}
-                        className="text-black"
-                      >
-                        <MdEdit size={20} className="edit-icon" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+  {!user.isActive && (
+    <span className="badge bg-warning text-dark ms-2">
+      Upgrade
+    </span>
+  )}
+</td>
+            <td>
+              {user?.role !== "admin" && (
+                <MdDelete
+                  size={20}
+                  className="me-3 action-icon"
+                  onClick={() => handlePopup(user)}
+                />
               )}
-            </tbody>
-          </table>
+
+              <Link
+                to={`/admin/edituser/${user._id}`}
+                className="text-dark"
+              >
+                <MdEdit size={20} className="edit-icon" />
+              </Link>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+
+  </table>
+</div>
 
           {totalPages > 1 && (
             <div className="d-flex justify-content-center align-items-center mt-4">

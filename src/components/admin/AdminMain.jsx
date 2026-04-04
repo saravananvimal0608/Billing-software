@@ -1,39 +1,43 @@
-import React, { useState } from 'react'
-import AdminSideBar from './AdminSideBar'
-import { Outlet } from 'react-router-dom'
+import React, { useState } from "react";
+import AdminSideBar from "./AdminSideBar";
+import { Outlet } from "react-router-dom";
 import { IoReorderThree } from "react-icons/io5";
+import ExpiryCheck from "../ExpiryCheck";
 
+const AdminMain = ({ toggleColor, setColorToggle }) => {
+  const [toggle, setToggle] = useState(false);
 
-const AdminMain = ({toggleColor,setColorToggle}) => {
-    const [toggle, setToggle] = useState(false)
-
-    return (
-        <div className='d-flex position-relative vh-100 overflow-hidden'>
-            <div className={`${toggle ? "mobile-view-active" : 'mobile-view'}`}>
-                <AdminSideBar setToggle={setToggle} toggleColor={toggleColor} setColorToggle={setColorToggle}/>
-            </div>
-
-            <IoReorderThree
-                className='three-dot'
-                size={40}
-                onClick={() => setToggle(true)}
-            />
-
-            {toggle && (
-                <div
-                    className="sidebar-overlay"
-                    onClick={() => setToggle(false)}
-                ></div>
-            )}
-
-
-            <div className='flex-grow-1 overflow-auto'>
-                <Outlet  />
-            </div>
-
-
+  return (
+    <>
+      <ExpiryCheck />
+      <div className="d-flex position-relative vh-100 overflow-hidden">
+        <div className={`${toggle ? "mobile-view-active" : "mobile-view"}`}>
+          <AdminSideBar
+            setToggle={setToggle}
+            toggleColor={toggleColor}
+            setColorToggle={setColorToggle}
+          />
         </div>
-    )
-}
 
-export default AdminMain
+        <IoReorderThree
+          className="three-dot"
+          size={40}
+          onClick={() => setToggle(true)}
+        />
+
+        {toggle && (
+          <div
+            className="sidebar-overlay"
+            onClick={() => setToggle(false)}
+          ></div>
+        )}
+
+        <div className="flex-grow-1 overflow-auto">
+          <Outlet />
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AdminMain;

@@ -36,6 +36,7 @@ const AllProduct = () => {
   const [imagePreviewPopup, setImagePreviewPopup] = useState(false);
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [iconMenuOpen, setIconMenuOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState("");
 
   const handleFetch = async (page = 1, search = "") => {
@@ -99,25 +100,37 @@ const AllProduct = () => {
     setTogglePopup(true);
   };
 
-  const handleUpgradePopup = (id, plan, paymentStatus) => {
+  const handleUpgradePopup = (id) => {
     setUpgradePopup(true);
-    setPaymentStatus(paymentStatus);
-    setPlan(plan);
     setShopId(id);
   };
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (id) => {
     try {
+      const finalId = id || shopId;
+
+      if (!finalId) {
+        toast.error("Shop ID missing ❌");
+        return;
+      }
+
       const res = await commonApi({
         endpoint: "api/shop/approve",
         method: "POST",
-        data: { shopId, plan },
+        data: {
+          shopId: finalId,
+          plan,
+          paymentStatus,
+        },
       });
+
       setUpgradePopup(false);
       toast.success(res.data.message);
       handleFetch();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Delete failed");
+      console.log(error);
+      
+      toast.error(error?.response?.data?.message || "Upgrade failed");
     }
   };
 
@@ -217,6 +230,8 @@ const AllProduct = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
+  console.log("shopsData", shopsData);
 
   return (
     <div className="container-fluid px-4">
@@ -399,10 +414,29 @@ const AllProduct = () => {
         <div className="otp-box">
           <div className="otp-card upgrade-card">
             <h4>Confirm Upgrade</h4>
-            <p>
-              Are you sure you want to upgrade this plan to <b>{plan}</b>?
-            </p>
-
+            <div className="select-option-container">
+              <label>Select Plan :</label>
+              <select
+                onChange={(e) => setPlan(e.target.value)}
+                className="select-option"
+              >
+                <option value="">Choose plan</option>
+                <option value={"Basic"}>Basic</option>
+                <option value={"Pro"}>Pro</option>
+                <option value={"Premium"}>Premium</option>
+              </select>
+            </div>
+            <div className="select-option-container">
+              <label>Payment Status :</label>
+              <select
+                onChange={(e) => setPaymentStatus(e.target.value)}
+                className="select-option"
+              >
+                <option value="">Select status</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
             <div className="popup-actions">
               <button
                 className="btn cancel-btn"
@@ -410,7 +444,7 @@ const AllProduct = () => {
               >
                 No
               </button>
-              <button className="btn confirm-btn" onClick={handleUpgrade}>
+              <button className="btn confirm-btn"  onClick={() => handleUpgrade()}>
                 Yes, Upgrade
               </button>
             </div>
@@ -527,11 +561,10 @@ const AllProduct = () => {
           </div>
         </div>
       )}
-
       {/* TABLE */}
-      <div className="table-wrapper">
-        <table className="premium-table">
-          <thead>
+      <div className="table-responsive">
+        <table className="table table-striped table-hover align-middle text-center">
+          <thead className="table-header">
             <tr>
               <th>No</th>
               <th>Shop</th>
@@ -540,7 +573,9 @@ const AllProduct = () => {
               <th>$ Status</th>
               <th>Owner</th>
               <th>Plan</th>
-              <th>Upgrade <br/>Request</th>
+              <th>Upgrade Request</th>
+              <th>Plan Expiry In</th>
+              <th>Same Plan Request</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -549,7 +584,7 @@ const AllProduct = () => {
             {loading ? (
               [...Array(5)].map((_, i) => (
                 <tr key={i}>
-                  {[...Array(9)].map((_, j) => (
+                  {[...Array(10)].map((_, j) => (
                     <td key={j}>
                       <Skeleton />
                     </td>
@@ -558,7 +593,7 @@ const AllProduct = () => {
               ))
             ) : shopsData.length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center py-4">
+                <td colSpan="10" className="text-center py-4">
                   No Shops Found
                 </td>
               </tr>
@@ -571,53 +606,99 @@ const AllProduct = () => {
                       checked={selectedProducts.includes(item._id)}
                       onChange={() => handleSelect(item._id)}
                     />
-                    <span className="ms-1">
-                      {" "}
+                    <span className="ms-2">
                       {(currentPage - 1) * 5 + index + 1}
                     </span>
                   </td>
 
-                  <td className="elipsis-main">{item.shopName}</td>
+                  <td>{item.shopName}</td>
+
                   <td
-                    className="elipsis-main"
+                    style={{ cursor: "pointer" }}
                     onClick={() => handleCopy(item.address)}
                     title="Click to copy"
                   >
                     {item.address}
                   </td>
+
                   <td>{item.mobileNumber}</td>
                   <td>{item.paymentStatus}</td>
-                  <td className="elipsis-main">{item.ownerName}</td>
+                  <td>{item.ownerName}</td>
                   <td>{item.subscriptionPlan}</td>
-                  <td>{item.upgradeStatus ? item.upgradePlanName : "----"}</td>
 
-                  <td style={{ position: "relative" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <MdDelete
-                        size={18}
+                  <td>{item.upgradeStatus ? item.upgradePlanName : "----"}</td>
+                  <td>
+                    {item.subscriptionExpiry ? (
+                      <span
+                        title={new Date(
+                          item.subscriptionExpiry,
+                        ).toLocaleString()}
+                        style={{
+                          color:
+                            Math.ceil(
+                              (new Date(item.subscriptionExpiry) - new Date()) /
+                                (1000 * 60 * 60 * 24),
+                            ) < 0
+                              ? "red"
+                              : "green",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {Math.ceil(
+                          (new Date(item.subscriptionExpiry) - new Date()) /
+                            (1000 * 60 * 60 * 24),
+                        )}{" "}
+                        days
+                      </span>
+                    ) : (
+                      <span className="text-muted">---</span>
+                    )}
+                  </td>
+                  <td>
+                    {item.stayCurrentPlan ? (
+                      confirmId === item._id ? (
+                        <div className="d-flex gap-2 justify-content-center">
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() => handleUpgrade(item._id)}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => setConfirmId(null)}
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => setConfirmId(item._id)}
+                        >
+                          Approve
+                        </button>
+                      )
+                    ) : (
+                      "---"
+                    )}
+                  </td>
+
+                  <td>
+                    <div className="d-flex justify-content-center">
+                      <button
+                        className="btn"
+                        onClick={() => handleUpgradePopup(item?._id)}
+                      >
+                        <MdEdit />
+                      </button>
+                      <button
+                        className="btn ps-0"
                         onClick={() => handlePopup(item)}
-                        style={{ cursor: "pointer" }}
-                      />
-                      {item.upgradeStatus && (
-                        <MdEdit
-                          size={18}
-                          onClick={() =>
-                            handleUpgradePopup(
-                              item._id,
-                              item.upgradePlanName,
-                              item.paymentStatus,
-                            )
-                          }
-                          style={{ cursor: "pointer" }}
-                        />
-                      )}
+                      >
+                        <MdDelete />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -626,7 +707,6 @@ const AllProduct = () => {
           </tbody>
         </table>
       </div>
-
       {/* PAGINATION */}
       {shopsData.length > 0 && totalPages > 1 && (
         <div className="d-flex justify-content-center align-items-center mt-4">

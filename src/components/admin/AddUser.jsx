@@ -7,15 +7,12 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
 const AddUser = () => {
-  const [otp, setOtp] = useState("");
-  const [otpToggle, setOtpToggle] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
   const [originalEmail, setOriginalEmail] = useState("");
   const [data, setData] = useState({ email: "", password: "" });
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [toggle, setToggle] = useState(false);
-const navigate = useNavigate()
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const handleFetchSingleUser = async () => {
@@ -61,76 +58,47 @@ const navigate = useNavigate()
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!handleError()) return;
+  if (!handleError()) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = id
-        ? await commonApi({
-            method: "PUT",
-            endpoint: `api/users/updateUser/${id}`,
-            data,
-          })
-        : await commonApi({
-            method: "POST",
-            endpoint: "api/users/create/salesman",
-            data,
-          });
+    const res = id
+      ? await commonApi({
+          method: "PUT",
+          endpoint: `api/users/updateUser/${id}`,
+          data,
+        })
+      : await commonApi({
+          method: "POST",
+          endpoint: "api/users/create/salesman",
+          data,
+        });
 
-      if (id) {
-        // update → verify with OLD email
-        setRegisteredEmail(originalEmail);
-      } else {
-        // register → verify with NEW email
-        setRegisteredEmail(data.email);
-      }
+    const emailToSend = id ? originalEmail : data.email;
 
-      setOtp("");
-      setOtpToggle(true);
-
-      // clear form only for register
-      if (!id) {
-        setData({ email: "", password: "" });
-      }
-
-      toast.success(res.data.message);
-    } catch (error) {
-      const message = error?.response?.data?.message;
-      toast.error(message || "Something went wrong");
-
-      // navigating to upgrade page
-      if (message?.toLowerCase().includes("upgrade")) {
-        navigate("/admin/upgrade");
-      }
-    } finally {
-      setLoading(false);
+    if (!id) {
+      setData({ email: "", password: "" });
     }
-  };
 
-  // ✅ OTP verify
-  const handleOtp = async () => {
-    try {
-      const res = await commonApi({
-        method: "POST",
-        endpoint: "api/users/verifyotp",
-        data: {
-          otp,
-          email: registeredEmail, // 🔥 IMPORTANT
-        },
-      });
+    toast.success(res.data.message);
 
-      toast.success(res.data.message);
+    navigate(`/verify-otp/${encodeURIComponent(emailToSend)}`);
 
-      setOtp("");
-      setOtpToggle(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+  } catch (error) {
+    const message = error?.response?.data?.message;
+    toast.error(message || "Something went wrong");
+
+    if (message?.toLowerCase().includes("upgrade")) {
+      navigate("/admin/upgrade");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (id) handleFetchSingleUser();
@@ -139,39 +107,6 @@ const navigate = useNavigate()
   return (
     <div className="position-relative">
       {loading && <Spinner fullScreen={true} />}
-
-      {/* ✅ OTP POPUP */}
-      {otpToggle && (
-        <div className="otp-box">
-          <div className="otp-card">
-            <h4>Verify OTP</h4>
-            <p>
-              OTP sent to <strong>{registeredEmail}</strong>
-            </p>
-
-            <input
-              type="text"
-              className="otp-input"
-              value={otp}
-              onChange={(e) => {
-                if (/^\d{0,6}$/.test(e.target.value)) {
-                  setOtp(e.target.value);
-                }
-              }}
-              placeholder="------"
-              maxLength={6}
-            />
-
-            <button
-              className={otp.length === 6 ? "login-btn" : "disable-btn"}
-              disabled={otp.length !== 6}
-              onClick={handleOtp}
-            >
-              Verify OTP
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* HEADER */}
       <div className="order-history-header mx-1 my-5 my-lg-3">

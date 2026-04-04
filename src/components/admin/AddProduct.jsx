@@ -142,7 +142,7 @@ const AddProduct = () => {
                             >
                                 <option value="" >Select Category</option>
                                 {categories.map((cat) => (
-                                    <option key={cat._id} value={cat._id} className="options elipsis-common">
+                                    <option key={cat._id} value={cat._id} className="options">
                                         <option key={cat._id} value={cat._id}>
                                             {cat.categoryName.length > 20
                                                 ? cat.categoryName.slice(0, 20) + "..."

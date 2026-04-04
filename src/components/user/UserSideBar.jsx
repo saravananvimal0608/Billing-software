@@ -15,8 +15,7 @@ const UserSideBar = ({ setToggle }) => {
         dispatch(fetDetails())
     }, [])
 
-    console.log(details);
-    
+   
     const navClass = ({ isActive }) =>
         `color-primary-main side-bar-content d-flex align-items-center gap-2 text-decoration-none ${isActive ? 'admin-navbar-active' : ''}`
 

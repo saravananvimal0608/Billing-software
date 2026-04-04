@@ -160,70 +160,79 @@ const AllCategories = () => {
             </div>
           )}
 
-          <table className="premium-table w-100">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Category</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                [...Array(4)].map((_, index) => (
-                  <tr key={index}>
-                    <td>
-                      <Skeleton width={20} />
-                    </td>
-                    <td>
-                      <Skeleton width={120} />
-                    </td>
-                    <td>
-                      <Skeleton width={20} inline />{" "}
-                      <Skeleton width={20} inline />
-                    </td>
-                  </tr>
-                ))
-              ) : categories.length === 0 ? (
+          <div className="table-responsive w-100">
+            <table className="table table-striped table-hover align-middle text-center">
+              <thead className="table-header">
                 <tr>
-                  <td colSpan={3} className="text-center login-title">
-                    No data found
-                  </td>
+                  <th>No</th>
+                  <th>Category</th>
+                  <th>Action</th>
                 </tr>
-              ) : (
-                categories.map((cat, index) => (
-                  <tr key={cat._id}>
-                    <td>
-                      <input
-                        className="me-3"
-                        type="checkbox"
-                        checked={selectedCategories.includes(cat._id)}
-                        onChange={() => handleSelect(cat._id)}
-                      />
-                      {(currentPage - 1) * 5 + index + 1}
-                    </td>
+              </thead>
 
-                    <td className="d-flex justify-content-center">
-                      <p className="elipsis-common m-0">{cat.categoryName}</p>
-                    </td>
-
-                    <td>
-                      <MdDelete
-                        size={20}
-                        className="me-3 action-icon"
-                        onClick={() => handlePopup(cat)}
-                      />
-
-                      <Link to={`/admin/editcategory/${cat._id}`}>
-                        <MdEdit size={20} className="edit-icon" />
-                      </Link>
+              <tbody>
+                {loading ? (
+                  [...Array(4)].map((_, index) => (
+                    <tr key={index}>
+                      <td>
+                        <Skeleton width={20} />
+                      </td>
+                      <td>
+                        <Skeleton width={120} />
+                      </td>
+                      <td>
+                        <Skeleton width={20} inline />{" "}
+                        <Skeleton width={20} inline />
+                      </td>
+                    </tr>
+                  ))
+                ) : categories.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="text-center login-title">
+                      No data found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  categories.map((cat, index) => (
+                    <tr key={cat._id}>
+                      <td>
+                        <input
+                          className="me-3"
+                          type="checkbox"
+                          checked={selectedCategories.includes(cat._id)}
+                          onChange={() => handleSelect(cat._id)}
+                        />
+                        {(currentPage - 1) * 5 + index + 1}
+                      </td>
+
+                      <td>
+                        <p
+                          title={cat.categoryName}
+                          className="m-0 text-truncate-custom"
+                        >
+                          {cat.categoryName?.length > 15
+                            ? `${cat.categoryName.slice(0, 15)}...`
+                            : cat.categoryName || "----"}
+                        </p>
+                      </td>
+
+                      <td>
+                        <MdDelete
+                          size={20}
+                          className="me-3 action-icon"
+                          onClick={() => handlePopup(cat)}
+                        />
+
+                        <Link to={`/admin/editcategory/${cat._id}`}>
+                          <MdEdit size={20} className="edit-icon" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {totalPages > 1 && (
             <div className="d-flex justify-content-center align-items-center mt-4">
