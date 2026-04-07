@@ -6,6 +6,7 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { TbMessageReportFilled } from "react-icons/tb";
 import { FaStore } from "react-icons/fa";
 import { GiUpgrade } from "react-icons/gi";
+import { MdPayment } from "react-icons/md";
 
 
 const SuperAdminSidebar = ({ setToggle }) => {
@@ -47,7 +48,7 @@ const SuperAdminSidebar = ({ setToggle }) => {
         </NavLink>
 
         <NavLink to="/superadmin/payment-history" onClick={() => setToggle(false)} className={navClass}>
-          <GiUpgrade size={25}/> Payment history
+          <MdPayment size={25}/> Payment History
         </NavLink>
 
 

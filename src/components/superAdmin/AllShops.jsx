@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import "../../css/Login.css";
 import Popup from "../DeletePopup.jsx";
 import { toast } from "react-toastify";
-import { MdDelete, MdEdit, MdMoreVert, MdAdd, MdVisibility, MdSettings } from "react-icons/md";
+import {
+  MdDelete,
+  MdEdit,
+  MdMoreVert,
+  MdAdd,
+  MdVisibility,
+  MdSettings,
+} from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { commonApi } from "../../common/common.js";
 import Skeleton from "react-loading-skeleton";
 
-const AllProduct = () => {
+const AllShop = () => {
   const [togglePopup, setTogglePopup] = useState(false);
   const [popupData, setPopupData] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
@@ -29,7 +36,8 @@ const AllProduct = () => {
   const [selectedBannerImage, setSelectedBannerImage] = useState(null);
   const [imagePreviewPopup, setImagePreviewPopup] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState("");
+  const [paymentStatusMap, setPaymentStatusMap] = useState({});
+  const [position, setPosition] = useState("");
 
   // Fetch shops
   const handleFetch = async (page = 1, search = "") => {
@@ -43,6 +51,8 @@ const AllProduct = () => {
       setShopsData(res?.data?.data || []);
       setTotalPages(res?.data?.totalPages || 1);
     } catch (error) {
+      console.log(error?.response?.data);
+
       toast.error(error?.response?.data?.message || "Fetch failed");
     } finally {
       setLoading(false);
@@ -51,7 +61,7 @@ const AllProduct = () => {
 
   const handleSelect = (id) => {
     setSelectedProducts((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -95,6 +105,7 @@ const AllProduct = () => {
   const handleUpgradePopup = (id) => {
     setUpgradePopup(true);
     setShopId(id);
+    setPlan("");
   };
 
   const handleUpgrade = async (id) => {
@@ -112,7 +123,6 @@ const AllProduct = () => {
         data: {
           shopId: finalId,
           plan,
-          paymentStatus,
         },
       });
 
@@ -128,8 +138,8 @@ const AllProduct = () => {
   // Multiple Banner Upload
   const handleBannerUpload = async () => {
     try {
-      if (!image || image.length === 0 || !PlanBanner) {
-        toast.error("Select images & plan");
+      if (!image || image.length === 0 || !PlanBanner || !position) {
+        toast.error("Select images & plan & positions");
         return;
       }
 
@@ -140,6 +150,7 @@ const AllProduct = () => {
       });
 
       formData.append("bannerType", PlanBanner);
+      formData.append("position", position);
 
       const res = await commonApi({
         method: "POST",
@@ -154,6 +165,7 @@ const AllProduct = () => {
       setPosterPopup(false);
       setImage([]);
       setPlanBanner("");
+      setPosition("");
 
       if (viewPosterPopup) {
         handleFetchBanners();
@@ -215,16 +227,38 @@ const AllProduct = () => {
     toast.success("Text Copied ✅");
   };
 
+  const paymentChange = async (item, status) => {
+    setPaymentStatusMap((prev) => ({ ...prev, [item._id]: status }));
+    try {
+      const res = await commonApi({
+        endpoint: "api/payment",
+        method: "POST",
+        data: {
+          shopId: item._id,
+          plan: item.subscriptionPlan,
+          paymentStatus: status,
+          startDate: item.subscriptionStartDate,
+          expiryDate: item.subscriptionExpiry,
+        },
+      });
+      toast.success(res.data.message || "Payment updated");
+      handleFetch(currentPage, searchTerm);
+    } catch (error) {
+      setPaymentStatusMap((prev) => ({
+        ...prev,
+        [item._id]: item.paymentStatus,
+      }));
+      toast.error(error?.response?.data?.message || "Payment update failed");
+    }
+  };
+
   // Close menus when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-    };
+    const handleClickOutside = () => {};
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  console.log('shopsData',shopsData);
-  
   return (
     <div className="container-fluid px-4">
       {/* delete popup */}
@@ -240,17 +274,28 @@ const AllProduct = () => {
       {posterPopup && (
         <div className="popup-overlay">
           <div className="popup-box" style={{ maxWidth: 480, width: "90%" }}>
-
             <div className="popup-header">
               <h4>Upload Banner</h4>
-              <IoClose className="close-icon" size={28} onClick={() => { setPosterPopup(false); setImage([]); setPlanBanner(""); }} />
+              <IoClose
+                className="close-icon"
+                size={28}
+                onClick={() => {
+                  setPosterPopup(false);
+                  setImage([]);
+                  setPlanBanner("");
+                }}
+              />
             </div>
 
             <div className="popup-body" style={{ height: "auto" }}>
-
               <div className="form-group">
                 <label>Banner Type</label>
-                <select className="form-input" style={{ cursor: "pointer" }} value={PlanBanner} onChange={(e) => setPlanBanner(e.target.value)}>
+                <select
+                  className="form-input"
+                  style={{ cursor: "pointer" }}
+                  value={PlanBanner}
+                  onChange={(e) => setPlanBanner(e.target.value)}
+                >
                   <option value="">Select Plan</option>
                   <option value="All">All</option>
                   <option value="Basic">Basic</option>
@@ -260,27 +305,68 @@ const AllProduct = () => {
               </div>
 
               <div className="form-group">
+                <label>Banner Position</label>
+                <select
+                  className="form-input"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                >
+                  <option value="">Select Position</option>
+                  <option value="footer">Footer</option>
+                  <option value="popup">Popup</option>
+                </select>
+              </div>
+              <div className="form-group">
                 <label>Upload Images</label>
-                <input type="file" accept="image/png,image/jpeg,image/jpg" className="form-input" style={{ padding: "10px" }} multiple onChange={(e) => setImage([...e.target.files])} />
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg"
+                  className="form-input"
+                  style={{ padding: "10px" }}
+                  multiple
+                  onChange={(e) => setImage([...e.target.files])}
+                />
               </div>
 
               {image.length > 0 && (
                 <div className="d-flex flex-wrap gap-2 mt-2">
                   {image.map((imgFile, index) => (
-                    <img key={index} src={URL.createObjectURL(imgFile)} alt={`preview-${index}`}
-                      style={{ width: 70, height: 60, objectFit: "cover", borderRadius: 8, border: "2px solid #e0e0e0" }}
+                    <img
+                      key={index}
+                      src={URL.createObjectURL(imgFile)}
+                      alt={`preview-${index}`}
+                      style={{
+                        width: 70,
+                        height: 60,
+                        objectFit: "cover",
+                        borderRadius: 8,
+                        border: "2px solid #e0e0e0",
+                      }}
                     />
                   ))}
                 </div>
               )}
-
             </div>
 
             <div className="popup-footer">
-              <button className="btn-cancel" onClick={() => { setPosterPopup(false); setImage([]); setPlanBanner(""); }}>Cancel</button>
-              <button className="login-btn" style={{ width: "auto", padding: "12px 28px" }} onClick={handleBannerUpload}>Upload</button>
+              <button
+                className="btn-cancel"
+                onClick={() => {
+                  setPosterPopup(false);
+                  setImage([]);
+                  setPlanBanner("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="login-btn"
+                style={{ width: "auto", padding: "12px 28px" }}
+                onClick={handleBannerUpload}
+              >
+                Upload
+              </button>
             </div>
-
           </div>
         </div>
       )}
@@ -289,34 +375,68 @@ const AllProduct = () => {
       {viewPosterPopup && (
         <div className="popup-overlay">
           <div className="popup-box" style={{ maxWidth: 560, width: "90%" }}>
-
             <div className="popup-header">
               <h4>All Banners</h4>
-              <IoClose className="close-icon" size={28} onClick={() => { setViewPosterPopup(false); setBannersList([]); }} />
+              <IoClose
+                className="close-icon"
+                size={28}
+                onClick={() => {
+                  setViewPosterPopup(false);
+                  setBannersList([]);
+                }}
+              />
             </div>
 
             <div className="popup-body" style={{ height: 340 }}>
               {loadingBanners ? (
                 <div className="d-flex flex-column gap-2">
-                  {[...Array(4)].map((_, i) => <Skeleton key={i} height={70} borderRadius={10} />)}
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} height={70} borderRadius={10} />
+                  ))}
                 </div>
               ) : bannersList.length === 0 ? (
                 <p className="text-center login-title mt-3">No banners found</p>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {bannersList.map((banner) => (
-                    <div key={banner._id} className="d-flex align-items-center gap-3 p-2 rounded" style={{ border: "1px solid #e0e0e0", background: "#f8f9fa" }}>
+                    <div
+                      key={banner._id}
+                      className="d-flex align-items-center gap-3 p-2 rounded"
+                      style={{
+                        border: "1px solid #e0e0e0",
+                        background: "#f8f9fa",
+                      }}
+                    >
                       <img
                         src={banner.bannerImage}
                         alt={banner.bannerType}
-                        style={{ width: 90, height: 65, objectFit: "cover", borderRadius: 8, cursor: "pointer", flexShrink: 0 }}
+                        style={{
+                          width: 90,
+                          height: 65,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          flexShrink: 0,
+                        }}
                         onClick={() => handleViewImage(banner.bannerImage)}
                       />
                       <div className="flex-grow-1 text-start">
-                        <span className="status-badge status-resolved fw-bold">{banner.bannerType}</span>
-                        <p className="m-0 mt-1" style={{ fontSize: 11, color: "#999" }}>ID: {banner._id}</p>
+                        <span className="status-badge status-resolved fw-bold">
+                          {banner.bannerType}
+                        </span>
+                        <p
+                          className="m-0 mt-1"
+                          style={{ fontSize: 11, color: "#999" }}
+                        >
+                          Position: {banner.position}
+                        </p>
                       </div>
-                      <MdDelete size={22} className="action-icon" style={{ color: "#d32f2f", flexShrink: 0 }} onClick={() => handleDeleteBanner(banner._id)} />
+                      <MdDelete
+                        size={22}
+                        className="action-icon"
+                        style={{ color: "#d32f2f", flexShrink: 0 }}
+                        onClick={() => handleDeleteBanner(banner._id)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -324,22 +444,54 @@ const AllProduct = () => {
             </div>
 
             <div className="popup-footer">
-              <button className="btn-cancel" onClick={() => { setViewPosterPopup(false); setBannersList([]); }}>Close</button>
+              <button
+                className="btn-cancel"
+                onClick={() => {
+                  setViewPosterPopup(false);
+                  setBannersList([]);
+                }}
+              >
+                Close
+              </button>
             </div>
-
           </div>
         </div>
       )}
 
       {/* image preview popup */}
       {imagePreviewPopup && (
-        <div className="popup-overlay" onClick={() => setImagePreviewPopup(false)}>
-          <div className="popup-box" style={{ maxWidth: 500, width: "90%", padding: 0, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="popup-overlay"
+          onClick={() => setImagePreviewPopup(false)}
+        >
+          <div
+            className="popup-box"
+            style={{
+              maxWidth: 500,
+              width: "90%",
+              padding: 0,
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="popup-header">
               <h4>Banner Preview</h4>
-              <IoClose className="close-icon" size={28} onClick={() => setImagePreviewPopup(false)} />
+              <IoClose
+                className="close-icon"
+                size={28}
+                onClick={() => setImagePreviewPopup(false)}
+              />
             </div>
-            <img src={selectedBannerImage} alt="Preview" style={{ width: "100%", maxHeight: 340, objectFit: "contain", background: "#f8f9fa" }} />
+            <img
+              src={selectedBannerImage}
+              alt="Preview"
+              style={{
+                width: "100%",
+                maxHeight: 340,
+                objectFit: "contain",
+                background: "#f8f9fa",
+              }}
+            />
           </div>
         </div>
       )}
@@ -348,37 +500,47 @@ const AllProduct = () => {
       {upgradePopup && (
         <div className="popup-overlay">
           <div className="popup-box">
-
             <div className="popup-header">
               <h4>Confirm Upgrade</h4>
-              <IoClose className="close-icon" size={28} onClick={() => setUpgradePopup(false)} />
+              <IoClose
+                className="close-icon"
+                size={28}
+                onClick={() => setUpgradePopup(false)}
+              />
             </div>
 
             <div className="popup-body" style={{ height: "auto" }}>
               <div className="form-group">
                 <label>Select Plan</label>
-                <select className="form-input" style={{ cursor: "pointer" }} onChange={(e) => setPlan(e.target.value)}>
+                <select
+                  className="form-input"
+                  value={plan}
+                  style={{ cursor: "pointer" }}
+                  onChange={(e) => setPlan(e.target.value)}
+                >
                   <option value="">Choose plan</option>
                   <option value="Basic">Basic</option>
                   <option value="Pro">Pro</option>
                   <option value="Premium">Premium</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label>Payment Status</label>
-                <select className="form-input" style={{ cursor: "pointer" }} onChange={(e) => setPaymentStatus(e.target.value)}>
-                  <option value="">Select status</option>
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                </select>
-              </div>
             </div>
 
             <div className="popup-footer">
-              <button className="btn-cancel" onClick={() => setUpgradePopup(false)}>Cancel</button>
-              <button className="login-btn" style={{ width: "auto", padding: "12px 28px" }} onClick={() => handleUpgrade()}>Yes, Upgrade</button>
+              <button
+                className="btn-cancel"
+                onClick={() => setUpgradePopup(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="login-btn"
+                style={{ width: "auto", padding: "12px 28px" }}
+                onClick={() => handleUpgrade()}
+              >
+                Yes, Upgrade
+              </button>
             </div>
-
           </div>
         </div>
       )}
@@ -494,13 +656,17 @@ const AllProduct = () => {
       )}
       {/* TABLE */}
       <div className="table-responsive">
-        <table className="table table-striped table-hover align-middle text-center">
+        <table
+          className="table table-striped table-hover align-middle text-center"
+          style={{ minWidth: "1400px" }}
+        >
           <thead className="table-header">
             <tr>
               <th>No</th>
               <th>Shop</th>
               <th>Address</th>
               <th>Mobile</th>
+              <th>Email</th>
               <th>$ Status</th>
               <th>Owner</th>
               <th>Plan</th>
@@ -515,7 +681,7 @@ const AllProduct = () => {
             {loading ? (
               [...Array(5)].map((_, i) => (
                 <tr key={i}>
-                  {[...Array(10)].map((_, j) => (
+                  {[...Array(12)].map((_, j) => (
                     <td key={j}>
                       <Skeleton />
                     </td>
@@ -524,7 +690,7 @@ const AllProduct = () => {
               ))
             ) : shopsData.length === 0 ? (
               <tr>
-                <td colSpan="10" className="text-center py-4">
+                <td colSpan="12" className="text-center py-4">
                   No Shops Found
                 </td>
               </tr>
@@ -545,15 +711,54 @@ const AllProduct = () => {
                   <td>{item.shopName}</td>
 
                   <td
+                    title={item.address}
                     style={{ cursor: "pointer" }}
                     onClick={() => handleCopy(item.address)}
-                    title="Click to copy"
                   >
                     {item.address}
                   </td>
-
                   <td>{item.mobileNumber}</td>
-                  <td>{item.paymentStatus}</td>
+                  <td
+                    onClick={() => handleCopy(item.adminEmail)}
+                    title={item.adminEmail}
+                    className="cursor-pointer"
+                  >
+                    {item.adminEmail}
+                  </td>
+                  <td>
+                    {item.subscriptionPlan !== "Basic" ? (
+                      <select
+                        className="input-search-box px-2 py-1"
+                        style={{
+                          background: "var(--secondary-gradient)",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                        }}
+                        value={
+                          paymentStatusMap[item._id] ??
+                          item.paymentStatus ??
+                          "pending"
+                        }
+                        onChange={(e) => paymentChange(item, e.target.value)}
+                      >
+                        <option style={{ background: "#1e3c48" }} value="paid">
+                          Paid
+                        </option>
+                        <option
+                          style={{ background: "#1e3c48" }}
+                          value="pending"
+                        >
+                          Pending
+                        </option>
+                      </select>
+                    ) : (
+                      "----"
+                    )}
+                  </td>
                   <td>{item.ownerName}</td>
                   <td>{item.subscriptionPlan}</td>
 
@@ -666,4 +871,4 @@ const AllProduct = () => {
   );
 };
 
-export default AllProduct;
+export default AllShop;

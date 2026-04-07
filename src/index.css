@@ -536,3 +536,21 @@
   color: #fff !important;
 
 }
+
+.admin-footer-banners {
+  display: flex;
+  gap: 0;
+  height: 86px;
+  overflow: hidden;
+}
+
+.admin-footer-banner-img {
+  flex: 1;
+  height: 86px;
+  object-fit: cover;
+  padding:10px;
+  width:100%;
+  border-radius: 10px;
+}
+
+

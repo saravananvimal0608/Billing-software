@@ -178,7 +178,7 @@ const ManagePlans = () => {
 
 {/* Table */}
   <div className="table-responsive">
-        <table className="table table-striped table-hover align-middle text-center">
+        <table className="table table-striped table-hover align-middle text-center" style={{ minWidth: "1400px" }}>
           <thead className="table-header">
       <tr>
         <th>No</th>

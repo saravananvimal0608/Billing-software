@@ -73,7 +73,6 @@ const AdminDashboard = () => {
     handleBannerImage();
   }, []);
 
-  console.log('banners',banners);
   
 
   return (

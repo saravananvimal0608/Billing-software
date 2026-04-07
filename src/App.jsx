@@ -27,6 +27,7 @@ import AllShops from "./components/superAdmin/AllShops";
 import "./css/SuperAdmin.css";
 import AddShops from "./components/superAdmin/AddShops";
 import ViewPlans from "./components/superAdmin/ViewPlans";
+import PaymentHistory from "./components/superAdmin/PaymentHistory";
 import { useState } from "react";
 import OtpBox from "./common/OtpBox";
 
@@ -84,6 +85,7 @@ const App = () => {
             <Route path="shops" element={<AddShops />} />
             <Route path="view-report" element={<ViewReport />} />
             <Route path="view-plan" element={<ViewPlans />} />
+            <Route path="payment-history" element={<PaymentHistory />} />
           </Route>
 
           {/* user routes */}
