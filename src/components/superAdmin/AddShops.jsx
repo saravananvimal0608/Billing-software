@@ -16,6 +16,7 @@ const AddShops = () => {
     email: "",
     password: "",
   });
+  const role = localStorage.getItem("role");
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [toggle, setToggle] = useState(false);
@@ -106,7 +107,6 @@ const AddShops = () => {
             data,
           });
 
-
       // ✅ clear only for register
       if (!id) {
         removeDataAfterSubmit();
@@ -126,19 +126,27 @@ const AddShops = () => {
   }, [id]);
 
   return (
-    <div className="position-relative">
+    <div className={`position-relative ${role ? "" : "bg-primary-main"}`}>
       {loading && <Spinner fullScreen={true} />}
 
-      <div className="order-history-header mx-1 my-5 my-lg-3">
-        <h1 className="order-history-title">
-          {id ? "Update Shop" : "Create Shop"}
-        </h1>
-        <p className="order-history-sub">
-          Please fill the details to {id ? "update" : "register"}
-        </p>
-      </div>
-
-      <div className="common-box container">
+      {role ? (
+        <div className="order-history-header mx-1 my-5 my-lg-3">
+          <h1 className="order-history-title">
+            {id ? "Update Shop" : "Create Shop"}
+          </h1>
+          <p className="order-history-sub">
+            Please fill the details to {id ? "update" : "register"}
+          </p>
+        </div>
+      ) : (
+        <div className="login-header text-center py-3">
+          <h1 className="login-title text-white">Create Shop</h1>
+          <p className="login-subtitle text-white">Please fill the details to register</p>
+        </div>
+      )}
+      <div
+        className={`common-box container ${role ? "" : "d-flex  vh-100 mb-0"}`}
+      >
         <div
           className="login-card"
           style={{ maxHeight: "450px", overflowY: "auto" }}
