@@ -1,35 +1,36 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { lazy, Suspense, useState } from "react";
 import { ToastContainer } from "react-toastify";
-import Login from "./components/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AdminMain from "./components/admin/AdminMain";
-import Dashboard from "./components/admin/AdminDashboard";
-import AddUser from "./components/admin/AddUser";
-import AddCategory from "./components/admin/AddCategory";
-import AddProduct from "./components/admin/AddProduct";
-import AllCategories from "./components/admin/AllCategories";
-import AllProduct from "./components/admin/AllProduct";
-import AllUser from "./components/admin/AllUser";
-import ForgetPassword from "./components/ForgetPassword";
 import { ProtectedRoute } from "./utils/ProtectedRoute";
-import Main from "./components/user/Main";
-import Home from "./components/user/Home";
-import ResetPassword from "./components/ResetPassword";
-import OrderHistory from "./components/admin/OrderHistory";
 import "react-loading-skeleton/dist/skeleton.css";
-import HelpUs from "./components/admin/HelpUs";
-import ViewReport from "./common/CommonViewReport";
-import Upgrade from "./components/admin/Upgrade";
-import SuperAdminMain from "./components/superAdmin/superAdminMain";
-import SuperAdminDashboard from "./components/superAdmin/Dashboard";
-import AllShops from "./components/superAdmin/AllShops";
 import "./css/SuperAdmin.css";
-import AddShops from "./components/superAdmin/AddShops";
-import ViewPlans from "./components/superAdmin/ViewPlans";
-import PaymentHistory from "./components/superAdmin/PaymentHistory";
-import { useState } from "react";
-import OtpBox from "./common/OtpBox";
+import Spinner from "./components/Spinner";
+const Login = lazy(() => import("./components/Login"));
+const AdminMain = lazy(() => import("./components/admin/AdminMain"));
+const Dashboard = lazy(() => import("./components/admin/AdminDashboard"));
+const AddUser = lazy(() => import("./components/admin/AddUser"));
+const AddCategory = lazy(() => import("./components/admin/AddCategory"));
+const AddProduct = lazy(() => import("./components/admin/AddProduct"));
+const AllCategories = lazy(() => import("./components/admin/AllCategories"));
+const AllProduct = lazy(() => import("./components/admin/AllProduct"));
+const AllUser = lazy(() => import("./components/admin/AllUser"));
+const ForgetPassword = lazy(() => import("./components/ForgetPassword"));
+const Main = lazy(() => import("./components/user/Main"));
+const Home = lazy(() => import("./components/user/Home"));
+const ResetPassword = lazy(() => import("./components/ResetPassword"));
+const OrderHistory = lazy(() => import("./components/admin/OrderHistory"));
+const HelpUs = lazy(() => import("./components/admin/HelpUs"));
+const ViewReport = lazy(() => import("./common/CommonViewReport"));
+const Upgrade = lazy(() => import("./components/admin/Upgrade"));
+const SuperAdminMain = lazy(() => import("./components/superAdmin/superAdminMain"));
+const SuperAdminDashboard = lazy(() => import("./components/superAdmin/Dashboard"));
+const AllShops = lazy(() => import("./components/superAdmin/AllShops"));
+const AddShops = lazy(() => import("./components/superAdmin/AddShops"));
+const ViewPlans = lazy(() => import("./components/superAdmin/ViewPlans"));
+const PaymentHistory = lazy(() => import("./components/superAdmin/PaymentHistory"));
+const OtpBox = lazy(() => import("./common/OtpBox"));
 
 const App = () => {
   const [toggleColor, setColorToggle] = useState(false);
@@ -37,12 +38,14 @@ const App = () => {
   return (
     <div>
       <BrowserRouter>
+      <Suspense fallback={<Spinner fullScreen={true}/>}>
         <Routes>
           {/*  common routes */}
           <Route path="/" element={<Login />} />
           <Route path="/forgotPassword" element={<ForgetPassword />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/verify-otp/:email" element={<OtpBox />} />
+          <Route path="/add-shop" element={<AddShops />} />
           {/* admin routes */}
           <Route
             path="/admin"
@@ -111,6 +114,7 @@ const App = () => {
             }
           />
         </Routes>
+        </Suspense>
       </BrowserRouter>
 
       <ToastContainer />

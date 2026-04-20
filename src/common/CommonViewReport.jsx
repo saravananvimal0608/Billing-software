@@ -122,91 +122,93 @@ const ViewReport = () => {
           />
         </div>
 
-{/* 📊 Table */}
-<div className="table-responsive w-100">
-  <table className="table table-striped table-hover align-middle text-center">
-    <thead className="table-header">
-      <tr>
-        <th>No</th>
+        {/* 📊 Table */}
+        <div className="table-responsive w-100">
+          <table className="table table-striped table-hover align-middle text-center">
+            <thead className="table-header">
+              <tr>
+                <th>No</th>
 
-        {role === "superadmin" && (
-          <>
-            <th>Date</th>
-            <th>Shop Name</th>
-            <th>Mobile</th>
-          </>
-        )}
+                {role === "superadmin" && (
+                  <>
+                    <th>Date</th>
+                    <th>Shop Name</th>
+                    <th>Mobile</th>
+                  </>
+                )}
 
-        <th>Subject</th>
-        <th>Description</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+                <th>Subject</th>
+                <th>Description</th>
+                <th>Status</th>
+              </tr>
+            </thead>
 
-    <tbody>
-      {loading ? (
-        [...Array(4)].map((_, index) => (
-          <tr key={index}>
-            {[...Array(role === "superadmin" ? 7 : 4)].map((_, i) => (
-              <td key={i}>
-                <Skeleton />
-              </td>
-            ))}
-          </tr>
-        ))
-      ) : data.length === 0 ? (
-        <tr>
-          <td
-            colSpan={role === "superadmin" ? 7 : 4}
-            className="text-center"
-          >
-            No data found
-          </td>
-        </tr>
-      ) : (
-        data.map((d, index) => (
-          <tr key={d._id}>
-            <td>{(currentPage - 1) * 5 + index + 1}</td>
+            <tbody>
+              {loading ? (
+                [...Array(4)].map((_, index) => (
+                  <tr key={index}>
+                    {[...Array(role === "superadmin" ? 7 : 4)].map((_, i) => (
+                      <td key={i}>
+                        <Skeleton />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : data.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={role === "superadmin" ? 7 : 4}
+                    className="text-center login-title"
+                  >
+                    No data found
+                  </td>
+                </tr>
+              ) : (
+                data.map((d, index) => (
+                  <tr key={d._id}>
+                    <td>{(currentPage - 1) * 5 + index + 1}</td>
 
-            {role === "superadmin" && (
-              <>
-                <td>{formatDate(d.createdAt)}</td>
-                <td>{d.shopId?.shopName || "----"}</td>
-                <td>{d.shopId?.mobileNumber || "----"}</td>
-              </>
-            )}
+                    {role === "superadmin" && (
+                      <>
+                        <td>{formatDate(d.createdAt)}</td>
+                        <td>{d.shopId?.shopName || "----"}</td>
+                        <td>{d.shopId?.mobileNumber || "----"}</td>
+                      </>
+                    )}
 
-            <td>
-              <span title={d.subject}>{d.subject}</span>
-            </td>
+                    <td>
+                      <span title={d.subject}>{d.subject}</span>
+                    </td>
 
-            <td>
-              <span title={d.description}>{d.description}</span>
-            </td>
+                    <td>
+                      <span title={d.description}>{d.description}</span>
+                    </td>
 
-            <td>
-              <span
-                className={`badge ${
-                  d.status === "resolved"
-                    ? "bg-success"
-                    : "bg-warning text-dark"
-                } ${role === "superadmin" ? "cursor-pointer" : ""}`}
-                style={{ cursor: role === "superadmin" ? "pointer" : "default" }}
-                onClick={() => {
-                  if (role === "superadmin") {
-                    handleUpdatePopup(d.status, d._id, d.shopId?._id);
-                  }
-                }}
-              >
-                {d.status}
-              </span>
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-</div>
+                    <td>
+                      <span
+                        className={`badge ${
+                          d.status === "resolved"
+                            ? "bg-success"
+                            : "bg-warning text-dark"
+                        } ${role === "superadmin" ? "cursor-pointer" : ""}`}
+                        style={{
+                          cursor: role === "superadmin" ? "pointer" : "default",
+                        }}
+                        onClick={() => {
+                          if (role === "superadmin") {
+                            handleUpdatePopup(d.status, d._id, d.shopId?._id);
+                          }
+                        }}
+                      >
+                        {d.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* 📄 Pagination */}
         {totalPages > 1 && (

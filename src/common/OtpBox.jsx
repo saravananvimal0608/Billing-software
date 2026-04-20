@@ -23,6 +23,9 @@ const OtpBox = () => {
       toast.success(res.data.message);
       if (role === "admin") navigate("/admin/allusers");
       else if (role === "superadmin") navigate("/superadmin/allshops");
+      else{
+        navigate("/")
+      }
       setOtp("");
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");

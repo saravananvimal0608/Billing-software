@@ -8,7 +8,6 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 const AddShops = () => {
   const navigate = useNavigate();
-  const [registeredEmail, setRegisteredEmail] = useState("");
   const [data, setData] = useState({
     shopName: "",
     ownerName: "",
@@ -87,7 +86,6 @@ const AddShops = () => {
     setData({ ...data, [name]: value });
   };
 
-  // 🔥 MAIN FIX HERE
   const handleSubmit = async (e) => {
     e.preventDefault();
 

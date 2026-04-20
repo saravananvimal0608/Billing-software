@@ -25,7 +25,7 @@ const Login = () => {
         endpoint: "api/users/login",
         data,
       });
-      
+
       const token = res.data.token;
       localStorage.setItem("token", token);
       localStorage.setItem("role", res.data.role);
@@ -53,7 +53,6 @@ const Login = () => {
       {loading && <Spinner fullScreen={true} />}
 
       <div className="login-container">
-
         <div className="login-card">
           <h2 className="login-title">Welcome Back</h2>
           <p className="login-subtitle">Please login to your account</p>
@@ -98,11 +97,19 @@ const Login = () => {
               Login
             </button>
             <Link
-              to={"/forgotPassword"}
+              to={"/add-shop"}
               className="text-decoration-none color-primary "
+            >
+              Don’t have an account?
+            </Link><br/>
+            <div  className="mt-2">
+            <Link
+              to={"/forgotPassword"}
+              className="text-decoration-none color-primary"
             >
               Forgot Password
             </Link>
+            </div>
           </form>
         </div>
       </div>
