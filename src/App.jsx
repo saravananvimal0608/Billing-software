@@ -46,6 +46,7 @@ const App = () => {
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/verify-otp/:email" element={<OtpBox />} />
           <Route path="/add-shop" element={<AddShops />} />
+          
           {/* admin routes */}
           <Route
             path="/admin"

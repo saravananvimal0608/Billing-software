@@ -152,7 +152,7 @@ const PaymentHistory = () => {
               ))
             ) : payments.length === 0 ? (
               <tr>
-                <td colSpan={6}>No Data Found</td>
+                <td colSpan={7}>No Data Found</td>
               </tr>
             ) : (
               payments.map((item, index) => (

@@ -16,7 +16,9 @@ const AdminMain = ({ toggleColor, setColorToggle }) => {
     try {
       const res = await commonApi({ endpoint: "api/banner" });
       const footer = res?.data?.data || [];
-      setFooterBanners(footer);
+      if (footer.position === "footer") {
+        setFooterBanners(footer);
+      }
     } catch (error) {
       console.log(error.response?.data?.message || "Something went wrong");
     }
@@ -57,6 +59,7 @@ const AdminMain = ({ toggleColor, setColorToggle }) => {
           </div>
 
           {/* Footer */}
+          {footerBanners.length !== 0 && 
           <footer className="admin-footer">
             {footerBanners.length > 0 && (
               <Swiper
@@ -76,6 +79,7 @@ const AdminMain = ({ toggleColor, setColorToggle }) => {
               </Swiper>
             )}
           </footer>
+          }
         </div>
       </div>
     </>
